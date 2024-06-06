@@ -38,7 +38,7 @@
 //             {contents}
 //         </div>
 //     );
-    
+
 //     async function populateWeatherData() {
 //         const response = await fetch('weatherforecast');
 //         const data = await response.json();
@@ -48,16 +48,26 @@
 
 // export default App;
 
-import DemobarComponent from './components/demobar-component';
-import FormBuilderComponent from './components/form-builder-component';
-import * as variables from './variables';
+import { Navigate, Route, Routes } from "react-router";
+import DemobarComponent from "./components/demobar-component";
+import FormBuilderComponent from "./components/form-builder-component";
+import * as variables from "./variables";
+import Layout from "./components/layout-component";
+import Home from "./components/home-component";
 
 function App() {
   return (
-    <>
-      <DemobarComponent variables={variables}/>
-      <FormBuilderComponent />
-    </>
+    // <>
+    //   <DemobarComponent variables={variables}/>
+    //   <FormBuilderComponent />
+    // </>
+    <Routes>
+      <Route path="/" exact element={<Navigate to="/home" />} />
+      <Route element={<Layout />}>
+        <Route path="/home" element={<Home />} />
+        <Route path='/FormBuilder/:Id' element={<FormBuilderComponent />} />
+      </Route>
+    </Routes>
   );
 }
 

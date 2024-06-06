@@ -25,6 +25,15 @@ const store = new Store({
         });
       } else if (loadUrl) {
         get(loadUrl).then(x => {
+          console.log("x1", x);
+          x = x.map(itemX => {
+            return {
+              ...itemX.taskData,
+              ...itemX,
+              taskData: undefined
+            };
+          });
+          console.log("x2", x);
           if (data && data.length > 0 && x.length === 0) {
             data.forEach(y => x.push(y));
           }
@@ -84,7 +93,18 @@ const store = new Store({
       if (_onPost) {
         _onPost({ task_data: data });
       } else if (_saveUrl) {
-        post(_saveUrl, { task_data: data });
+        let newData = data.map(item => {
+          return {
+              templateId: item.templateId,
+              fieldNo: item.fieldNo,
+              taskData: JSON.stringify({
+                  ...item,
+                  template: null
+              })
+          };
+        });
+        console.log(newData);
+        post(_saveUrl, newData );
       }
     },
   },

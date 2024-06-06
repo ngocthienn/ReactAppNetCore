@@ -1,25 +1,46 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 // eslint-disable-next-line no-unused-vars
-import FormBuilder, { Registry } from "../react-form-builder2";
+import FormBuilder from "../react-form-builder2";
 import * as variables from "../variables";
+import { useLocation } from 'react-router';
+import DemobarComponent from "./demobar-component";
 
 // Add our stylesheets for the demo.
 import "../scss/application.scss";
 
-const url = "/api/formdata";
+const apiUrl = import.meta.env.VITE_API_URL;
+// const url = `${apiUrl}/Template/GetControls`;
 const saveUrl = "/api/formdata";
 
-const TestComponent = () => <h2>Hello</h2>;
+const FormBuilderComponent = () => {
+  const [url, setUrl] = useState('');
+  const [saveUrl, setSaveUrl] = useState('/api/formdata');
+  const location = useLocation();
 
-const FormBuilderComponent = () => (
-  <FormBuilder.ReactFormBuilder
-    variables={variables}
-    url={url}
-    saveUrl={saveUrl}
-    locale="en"
-    saveAlways={false}
-    // toolbarItems={items}
-  />
-);
+  const key = url;
+
+  useEffect(() => {
+    let Id = parseInt(location.pathname.replace("/FormBuilder/", ""));
+    console.log(Id);
+    setUrl(`${apiUrl}/Template/GetControl/${Id}`);
+    setSaveUrl(`${apiUrl}/Template/UpdateControlWithTemplateId/${Id}`);
+  }, [location])
+
+  return (
+    <>
+      <DemobarComponent variables={variables} />
+      <FormBuilder.ReactFormBuilder
+        key={key}
+        variables={variables}
+        url={url}
+        saveUrl={saveUrl}
+        locale="en"
+        saveAlways={false}
+      // toolbarItems={items}
+      />
+    </>
+
+  );
+};
 
 export default FormBuilderComponent;
