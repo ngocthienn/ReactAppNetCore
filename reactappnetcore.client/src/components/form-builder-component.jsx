@@ -14,16 +14,18 @@ const saveUrl = "/api/formdata";
 
 const FormBuilderComponent = () => {
   const [url, setUrl] = useState('');
-  const [saveUrl, setSaveUrl] = useState('/api/formdata');
+    const [saveUrl, setSaveUrl] = useState(`${apiUrl}/Template/UpdateControlWithTemplateId/`);
   const location = useLocation();
 
   const key = url;
 
   useEffect(() => {
     let Id = parseInt(location.pathname.replace("/FormBuilder/", ""));
-    console.log(Id);
-    setUrl(`${apiUrl}/Template/GetControl/${Id}`);
-    setSaveUrl(`${apiUrl}/Template/UpdateControlWithTemplateId/${Id}`);
+      console.log(Id);
+      if (!isNaN(Id)) {
+          setUrl(`${apiUrl}/Template/GetControl/${Id}`);
+          setSaveUrl(`${apiUrl}/Template/UpdateControlWithTemplateId/${Id}`);
+      }
   }, [location])
 
   return (

@@ -16,27 +16,30 @@ const Home = () => {
         // };
     }, []);
     return (
-        <table className="table">
-            <thead>
-                <tr>
-                    <th scope="col">#</th>
-                    <th scope="col">ID</th>
-                    <th scope="col">Name</th>
-                    <th scope="col">Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                {data.length > 0 ? (
-                    data.map((item, index) => (
-                        <TemplateItem key={index} item={item} index={index} />
-                    ))
-                ) : (
+        <>
+            <table className="table">
+                <thead>
                     <tr>
-                        <td>Loading...</td>
+                        <th scope="col">#</th>
+                        <th scope="col">ID</th>
+                        <th scope="col">Name</th>
+                        <th scope="col">Action</th>
                     </tr>
-                )}
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    {data.length > 0 ? (
+                        data.map((item, index) => (
+                            <TemplateItem key={index} item={item} index={index} />
+                        ))
+                    ) : (
+                        <tr>
+                            <td>Loading...</td>
+                        </tr>
+                    )}
+                </tbody>
+            </table>
+            <button><a href={`/FormBuilder`}>Add</a></button>
+        </>
     );
 };
 

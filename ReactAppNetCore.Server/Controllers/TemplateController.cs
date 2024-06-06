@@ -6,6 +6,7 @@ using ReactAppNetCore.Server.DTOs;
 using ReactAppNetCore.Server.Models;
 using ReactAppNetCore.Server.Repositories;
 using System.Text.Json;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace ReactAppNetCore.Server.Controllers
@@ -39,29 +40,48 @@ namespace ReactAppNetCore.Server.Controllers
             return await _formDBContext.Controls.Where(c => c.templateId == id).OrderBy(c => c.fieldNo).ToListAsync();
         }
 
-        [HttpPost("[action]/{id}")]
-        public async Task<ActionResult> UpdateControlWithTemplateId(int id, [FromBody] List<ControlDTO> itemsToUpdate)
+        [HttpPost("[action]/{id?}")]
+        public async Task<ActionResult> UpdateControlWithTemplateId(int? id, [FromBody] List<ControlDTO> itemsToUpdate)
         {
-            var itemsInDb = await _formDBContext.Controls.Where(i => i.templateId == id).ToListAsync();
-
-            if (itemsInDb == null)
-            {
-                return NotFound();
-            }
-
-            var itemsToDelete = await _formDBContext.Controls.Where(i => i.templateId == id).ToListAsync();
-            _formDBContext.Controls.RemoveRange(itemsToDelete);
-
             int fieldNo = 0;
-            foreach (var item in itemsToUpdate)
+            if (id == null)
             {
-                var update = new Control();
-                update.templateId = id;
-                update.fieldNo = ++fieldNo;
-                update.taskData = JsonDocument.Parse(item.taskData);
-                await _formDBContext.Controls.AddAsync(update);
+                var template = new Template();
+                template.name = "name";
+                await _formDBContext.Templates.AddAsync(template);
+                _formDBContext.SaveChanges();
+                foreach (var item in itemsToUpdate)
+                {
+                    var update = new Control();
+                    update.templateId = template.Id;
+                    update.fieldNo = ++fieldNo;
+                    update.taskData = JsonDocument.Parse(item.taskData);
+                    await _formDBContext.Controls.AddAsync(update);
+                }
+                _formDBContext.SaveChanges();
             }
-            _formDBContext.SaveChanges();
+            else
+            {
+                var itemsInDb = await _formDBContext.Controls.Where(i => i.templateId == id).ToListAsync();
+
+                if (itemsInDb == null)
+                {
+                    return NotFound();
+                }
+
+                var itemsToDelete = await _formDBContext.Controls.Where(i => i.templateId == id).ToListAsync();
+                _formDBContext.Controls.RemoveRange(itemsToDelete);
+
+                foreach (var item in itemsToUpdate)
+                {
+                    var update = new Control();
+                    update.templateId = (int)id;
+                    update.fieldNo = ++fieldNo;
+                    update.taskData = JsonDocument.Parse(item.taskData);
+                    await _formDBContext.Controls.AddAsync(update);
+                }
+                _formDBContext.SaveChanges();
+            }
             return Ok();
         }
     }

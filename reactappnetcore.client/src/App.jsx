@@ -64,7 +64,8 @@ function App() {
     <Routes>
       <Route path="/" exact element={<Navigate to="/home" />} />
       <Route element={<Layout />}>
-        <Route path="/home" element={<Home />} />
+              <Route path="/home" element={<Home />} />
+              <Route path='/FormBuilder' element={<FormBuilderComponent />} />
         <Route path='/FormBuilder/:Id' element={<FormBuilderComponent />} />
       </Route>
     </Routes>
