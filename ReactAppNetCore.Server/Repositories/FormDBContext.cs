@@ -12,10 +12,13 @@ namespace ReactAppNetCore.Server.Repositories
                 .HasKey(c => new { c.templateId, c.fieldNo });
             modelBuilder.Entity<Control>().Property(c => c.taskData).HasColumnType("json");
 
+            modelBuilder.Entity<Answer>().Property(c => c.answerData).HasColumnType("json");
+
             base.OnModelCreating(modelBuilder);
         }
 
         public DbSet<Control> Controls { get; set; }
+        public DbSet<Answer> Answers { get; set; }
         public DbSet<Template> Templates { get; set; }
     }
 }

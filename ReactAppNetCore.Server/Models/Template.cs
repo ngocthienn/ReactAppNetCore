@@ -14,8 +14,12 @@ namespace ReactAppNetCore.Server.Models
         [System.Text.Json.Serialization.JsonIgnore]
         public ICollection<Control> controls { get; set; }
 
+        [System.Text.Json.Serialization.JsonIgnore]
+        public ICollection<Answer> answers { get; set; }
+
         public Template() {
             controls = new HashSet<Control>();
+            answers = new HashSet<Answer>();
         }
     }
 }

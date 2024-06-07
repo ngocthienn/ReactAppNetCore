@@ -7,9 +7,14 @@ let _onLoad;
 
 const store = new Store({
   actions: {
-    setData(context, data, saveData) {
+    setData(context, data, answer, saveData) {
       context.commit('setData', data);
-      if (saveData) this.save(data);
+      context.commit('setAnswer', answer);
+      if (saveData) this.save(data, answer);
+    },
+    setAnswer(context, answer, data, saveData) {
+      context.commit('setAnswer', answer);
+      // if (saveData) this.save(data, answer);
     },
 
     load(context, { loadUrl, saveUrl, data, saveAlways }) {
@@ -25,7 +30,6 @@ const store = new Store({
         });
       } else if (loadUrl) {
         get(loadUrl).then(x => {
-          console.log("x1", x);
           x = x.map(itemX => {
             return {
               ...itemX.taskData,
@@ -33,7 +37,6 @@ const store = new Store({
               taskData: undefined
             };
           });
-          console.log("x2", x);
           if (data && data.length > 0 && x.length === 0) {
             data.forEach(y => x.push(y));
           }
@@ -42,6 +45,16 @@ const store = new Store({
       } else {
         this.setData(context, data);
       }
+    },
+
+    loadAnswer(context, { loadUrl }) {
+      get(loadUrl).then(x => {
+        this.setAnswer(context, x);
+      });
+    },
+
+    getAnswer() {
+      return state.answer;
     },
 
     create(context, element) {
@@ -73,8 +86,8 @@ const store = new Store({
     },
 
     post(context) {
-      const { data } = context.state;
-      this.setData(context, data, true);
+      const { data, answer } = context.state;
+      this.setData(context, data, answer, true);
     },
 
     updateOrder(context, elements) {
@@ -89,7 +102,7 @@ const store = new Store({
       context.commit('setLastItem', item.isContainer ? null : item);
     },
 
-    save(data) {
+    save(data, answer) {
       if (_onPost) {
         _onPost({ task_data: data });
       } else if (_saveUrl) {
@@ -103,8 +116,7 @@ const store = new Store({
               })
           };
         });
-        console.log(newData);
-        post(_saveUrl, newData );
+        post(_saveUrl, { controlUpdates : newData, answerUpdate : answer } );
       }
     },
   },
@@ -113,6 +125,11 @@ const store = new Store({
     setData(state, payload) {
       // eslint-disable-next-line no-param-reassign
       state.data = payload;
+      return state;
+    },
+    setAnswer(state, payload) {
+      // eslint-disable-next-line no-param-reassign
+      state.answer = payload;
       return state;
     },
     setSaveAlways(state, payload) {
@@ -126,12 +143,16 @@ const store = new Store({
       // console.log('setLastItem', payload);
       return state;
     },
+    getAnswer() {
+      return state.answer;
+    },
   },
 
   initialState: {
     data: [],
     saveAlways: true,
     lastItem: null,
+    answer : {},
   },
 });
 

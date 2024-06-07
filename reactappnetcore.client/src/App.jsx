@@ -54,6 +54,7 @@ import FormBuilderComponent from "./components/form-builder-component";
 import * as variables from "./variables";
 import Layout from "./components/layout-component";
 import Home from "./components/home-component";
+import Answer from "./components/answer-component";
 
 function App() {
   return (
@@ -64,9 +65,10 @@ function App() {
     <Routes>
       <Route path="/" exact element={<Navigate to="/home" />} />
       <Route element={<Layout />}>
-              <Route path="/home" element={<Home />} />
-              <Route path='/FormBuilder' element={<FormBuilderComponent />} />
+        <Route path="/home" element={<Home />} />
+        <Route path='/FormBuilder' element={<FormBuilderComponent />} />
         <Route path='/FormBuilder/:Id' element={<FormBuilderComponent />} />
+        <Route path="/answer/:Id" element={<Answer />} />
       </Route>
     </Routes>
   );

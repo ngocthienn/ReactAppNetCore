@@ -7,7 +7,6 @@ const headers = {
 };
 
 export function post(url, data) {
-  console.log("data", data);
   return fetch(url, {
     method: 'POST',
     headers,
