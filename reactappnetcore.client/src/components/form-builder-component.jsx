@@ -18,7 +18,6 @@ const FormBuilderComponent = () => {
   const [saveUrl, setSaveUrl] = useState(`${apiUrl}/Template/UpdateControlWithTemplateId/`);
   const [answerUrl, setAnswerUrl] = useState('');
   const location = useLocation();
-  const [storeForm, setStoreForm] = useState(store);
 
   const key = url;
 
@@ -28,14 +27,12 @@ const FormBuilderComponent = () => {
       setUrl(`${apiUrl}/Template/GetControl/${Id}`);
       setSaveUrl(`${apiUrl}/Template/UpdateControlWithTemplateId/${Id}`);
       setAnswerUrl(`${apiUrl}/Answer/GetAnswerDefault/${Id}`);
-      store.dispatch('loadAnswer', { loadUrl: `${apiUrl}/Answer/GetAnswerDefault/${Id}` });
-      setStoreForm(store);
     }
   }, [location])
 
   return (
     <>
-      <DemobarComponent variables={variables} answerUrl={answerUrl} storeForm={storeForm}/>
+      <DemobarComponent variables={variables} answerUrl={answerUrl} />
       <FormBuilder.ReactFormBuilder
         key={key}
         variables={variables}

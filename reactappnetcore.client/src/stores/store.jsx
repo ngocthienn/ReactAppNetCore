@@ -7,14 +7,9 @@ let _onLoad;
 
 const store = new Store({
   actions: {
-    setData(context, data, answer, saveData) {
+    setData(context, data, saveData) {
       context.commit('setData', data);
-      context.commit('setAnswer', answer);
-      if (saveData) this.save(data, answer);
-    },
-    setAnswer(context, answer, data, saveData) {
-      context.commit('setAnswer', answer);
-      // if (saveData) this.save(data, answer);
+      if (saveData) this.save(data, context);
     },
 
     load(context, { loadUrl, saveUrl, data, saveAlways }) {
@@ -47,16 +42,6 @@ const store = new Store({
       }
     },
 
-    loadAnswer(context, { loadUrl }) {
-      get(loadUrl).then(x => {
-        this.setAnswer(context, x);
-      });
-    },
-
-    getAnswer() {
-      return state.answer;
-    },
-
     create(context, element) {
       const { data, saveAlways } = context.state;
       data.push(element);
@@ -86,8 +71,8 @@ const store = new Store({
     },
 
     post(context) {
-      const { data, answer } = context.state;
-      this.setData(context, data, answer, true);
+      const { data } = context.state;
+      this.setData(context, data, true);
     },
 
     updateOrder(context, elements) {
@@ -102,7 +87,7 @@ const store = new Store({
       context.commit('setLastItem', item.isContainer ? null : item);
     },
 
-    save(data, answer) {
+    save(data, context) {
       if (_onPost) {
         _onPost({ task_data: data });
       } else if (_saveUrl) {
@@ -110,13 +95,16 @@ const store = new Store({
           return {
               templateId: item.templateId,
               fieldNo: item.fieldNo,
-              taskData: JSON.stringify({
+              taskData: {
                   ...item,
                   template: null
-              })
+              }
           };
         });
-        post(_saveUrl, { controlUpdates : newData, answerUpdate : answer } );
+        let res = post(_saveUrl, newData );
+        if(res !== undefined && res !== '') {
+          context.commit('setTemplateId', res);
+        }
       }
     },
   },
@@ -143,8 +131,10 @@ const store = new Store({
       // console.log('setLastItem', payload);
       return state;
     },
-    getAnswer() {
-      return state.answer;
+    setTemplateId(state, payload) {
+      // eslint-disable-next-line no-param-reassign
+      state.templateId = payload;
+      return state;
     },
   },
 
@@ -153,6 +143,7 @@ const store = new Store({
     saveAlways: true,
     lastItem: null,
     answer : {},
+    templateId : '',
   },
 });
 

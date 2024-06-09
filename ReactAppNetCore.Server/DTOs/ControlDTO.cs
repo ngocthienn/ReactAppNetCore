@@ -10,6 +10,6 @@ namespace ReactAppNetCore.Server.DTOs
 
         public int fieldNo { get; set; }
 
-        public string taskData { get; set; }
+        public JsonDocument taskData { get; set; }
     }
 }

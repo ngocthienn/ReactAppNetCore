@@ -16,6 +16,13 @@ const answers = [{"id": "4A15C8F3-1CF3-42DB-A64D-BC48AB12BA0F","name": "dropdown
 // };
 const apiUrl = import.meta.env.VITE_API_URL;
 const answerUrl = `${apiUrl}/Answer/GetAnswerDefault/`;
+
+const headers = {
+  Accept: 'application/json',
+  'Content-Type': 'application/json; charset=utf-8',
+  OPTIONS: '',
+};
+
 export default class DemobarComponent extends React.Component {
   constructor(props) {
     super(props);
@@ -24,35 +31,44 @@ export default class DemobarComponent extends React.Component {
       previewVisible: false,
       shortPreviewVisible: false,
       roPreviewVisible: false,
-      answer: store.state.answer,
-      store : store.state,
+      answer: [],
+      answerId : '',
     };
   }
 
-  componentDidMount() {
-    const currentUrl = window.location.href;
-    const lastSegment = currentUrl.substring(currentUrl.lastIndexOf('/') + 1);
+  // componentDidMount() {
+  //   const currentUrl = window.location.href;
+  //   const lastSegment = currentUrl.substring(currentUrl.lastIndexOf('/') + 1);
 
-    if(!isNaN(lastSegment)) {
-      store.dispatch('loadAnswer', { loadUrl: answerUrl + lastSegment });
-    }
-  }
+  //   if(!isNaN(lastSegment)) {
+  //     store.dispatch('loadAnswer', { loadUrl: answerUrl + lastSegment });
+  //   }
+  // }
 
   componentWillMount() {
     const update = this._onChange.bind(this);
     this._onSubmit = this._onSubmit.bind(this);
     store.subscribe(state => {update(state.data)});
 
-    const updateAnswer = this._onChangeAnswer.bind(this);
-    store.subscribe(state => {updateAnswer(state.answer)});
-    
+    const currentUrl = window.location.href;
+    const lastSegment = currentUrl.substring(currentUrl.lastIndexOf('/') + 1);
 
-    store.subscribe(state => this.setState({ store: state }));
-    console.log(JSON.stringify(this.state.store.answer));
+    if(!isNaN(lastSegment)) {
+      fetch(`${apiUrl}/Answer/GetAnswerDefault/${lastSegment}`, {
+        method: 'GET',
+        headers,
+      }).then(response => response.json())
+      .then(c => {
+        this.setState({
+          answer : c.answerData,
+          answerId : c.id,
+        });
+      });
+    }
   }
 
   showPreview() {
-    this.saveFormData();
+    // this.saveFormData();
     this.setState({
       previewVisible: true,
     });
@@ -86,16 +102,37 @@ export default class DemobarComponent extends React.Component {
     });
   }
 
-  _onChangeAnswer(answer) {
-    this.setState({
-      answer,
-    });
-  }
-
   // eslint-disable-next-line no-unused-vars
   _onSubmit(data) {
-    console.log('onSubmit', data);
-    console.log('answer', this.state.answer);
+    
+    const currentUrl = window.location.href;
+    const lastSegment = currentUrl.substring(currentUrl.lastIndexOf('/') + 1);
+
+    if(!isNaN(lastSegment)) {
+      console.log(JSON.stringify({ 
+        id : parseInt(this.state.answerId), 
+        templateId: parseInt(lastSegment),
+        answerData : data,
+      }));
+      fetch(`${apiUrl}/Answer/UpdateAnswerDefaultWithTemplateId/${lastSegment}`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ 
+          id : parseInt(this.state.answerId), 
+          templateId: parseInt(lastSegment),
+          answerData : data,
+        }),
+      }).then(response => {
+        if (window.confirm("Update thành công")) {
+          window.location.reload();
+        } else {
+          window.location.reload();
+        }
+        
+      });
+    } else {
+      alert("Chưa save Template");
+    }
   }
 
   saveFormData() {
@@ -134,7 +171,7 @@ export default class DemobarComponent extends React.Component {
                   download_path=""
                   back_action="/"
                   back_name="Back"
-                  answer_data={this.props.storeForm.answer}
+                  answer_data={this.state.answer}
                   action_name="Save"
                   form_action={this.props.answerUrl}
                   form_method="POST"
