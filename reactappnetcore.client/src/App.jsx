@@ -48,29 +48,58 @@
 
 // export default App;
 
-import { Navigate, Route, Routes } from "react-router";
-import DemobarComponent from "./components/demobar-component";
-import FormBuilderComponent from "./components/form-builder-component";
-import * as variables from "./variables";
-import Layout from "./components/layout-component";
-import Home from "./components/home-component";
-import Answer from "./components/answer-component";
+// import { Navigate, Route, Routes } from "react-router";
+// import DemobarComponent from "./components/demobar-component";
+// import FormBuilderComponent from "./components/form-builder-component";
+// import * as variables from "../variables";
+// import Layout from "./components/layout-component";
+// import Home from "./components/home-component";
+// import Answer from "./components/answer-component";
+
+// function App() {
+//   return (
+//     <>
+//       <DemobarComponent variables={variables}/>
+//       <FormBuilderComponent />
+//     </>
+//     // <Routes>
+//     //   <Route path="/" exact element={<Navigate to="/home" />} />
+//     //   <Route element={<Layout />}>
+//     //     <Route path="/home" element={<Home />} />
+//     //     <Route path='/FormBuilder' element={<FormBuilderComponent />} />
+//     //     <Route path='/FormBuilder/:Id' element={<FormBuilderComponent />} />
+//     //     <Route path="/answer/:Id" element={<Answer />} />
+//     //   </Route>
+//     // </Routes>
+//   );
+// }
+
+import React from 'react';
+import DemoBar from './demobar';
+// eslint-disable-next-line no-unused-vars
+import FormBuilder from './index';
+import * as variables from '../variables';
+
+// Add our stylesheets for the demo.
+import "../scss/application.scss";
+
+const url = '/api/formdata';
+const saveUrl = '/api/formdata';
 
 function App() {
   return (
-    // <>
-    //   <DemobarComponent variables={variables}/>
-    //   <FormBuilderComponent />
-    // </>
-    <Routes>
-      <Route path="/" exact element={<Navigate to="/home" />} />
-      <Route element={<Layout />}>
-        <Route path="/home" element={<Home />} />
-        <Route path='/FormBuilder' element={<FormBuilderComponent />} />
-        <Route path='/FormBuilder/:Id' element={<FormBuilderComponent />} />
-        <Route path="/answer/:Id" element={<Answer />} />
-      </Route>
-    </Routes>
+    <div>
+      <DemoBar variables={variables} />
+      <FormBuilder.ReactFormBuilder
+        variables={variables}
+        url={url}
+        saveUrl={saveUrl}
+        locale='vi'
+        saveAlways={false}
+      // toolbarItems={items}
+      />
+      
+    </div>
   );
 }
 

@@ -41,10 +41,13 @@ export default defineConfig({
             '@': fileURLToPath(new URL('./src', import.meta.url))
         }
     },
-    define: {
-        // By default, Vite doesn't include shims for NodeJS/
-        // necessary for segment analytics lib to work
-        global: {},
+    optimizeDeps: {
+        esbuildOptions: {
+            // Node.js global to browser globalThis
+            define: {
+                global: 'globalThis',
+            },
+        },
     },
     server: {
         proxy: {

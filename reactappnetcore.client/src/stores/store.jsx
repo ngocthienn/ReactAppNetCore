@@ -9,7 +9,7 @@ const store = new Store({
   actions: {
     setData(context, data, saveData) {
       context.commit('setData', data);
-      if (saveData) this.save(data, context);
+      if (saveData) this.save(data);
     },
 
     load(context, { loadUrl, saveUrl, data, saveAlways }) {
@@ -24,19 +24,12 @@ const store = new Store({
           this.setData(context, x);
         });
       } else if (loadUrl) {
-        get(loadUrl).then(x => {
-          x = x.map(itemX => {
-            return {
-              ...itemX.taskData,
-              ...itemX,
-              taskData: undefined
-            };
-          });
-          if (data && data.length > 0 && x.length === 0) {
-            data.forEach(y => x.push(y));
-          }
-          this.setData(context, x);
-        });
+        // get(loadUrl).then(x => {
+        //   if (data && data.length > 0 && x.length === 0) {
+        //     data.forEach(y => x.push(y));
+        //   }
+        //   this.setData(context, x);
+        // });
       } else {
         this.setData(context, data);
       }
@@ -87,24 +80,11 @@ const store = new Store({
       context.commit('setLastItem', item.isContainer ? null : item);
     },
 
-    save(data, context) {
+    save(data) {
       if (_onPost) {
         _onPost({ task_data: data });
       } else if (_saveUrl) {
-        let newData = data.map(item => {
-          return {
-              templateId: item.templateId,
-              fieldNo: item.fieldNo,
-              taskData: {
-                  ...item,
-                  template: null
-              }
-          };
-        });
-        let res = post(_saveUrl, newData );
-        if(res !== undefined && res !== '') {
-          context.commit('setTemplateId', res);
-        }
+        post(_saveUrl, { task_data: data });
       }
     },
   },
@@ -113,11 +93,6 @@ const store = new Store({
     setData(state, payload) {
       // eslint-disable-next-line no-param-reassign
       state.data = payload;
-      return state;
-    },
-    setAnswer(state, payload) {
-      // eslint-disable-next-line no-param-reassign
-      state.answer = payload;
       return state;
     },
     setSaveAlways(state, payload) {
@@ -131,19 +106,12 @@ const store = new Store({
       // console.log('setLastItem', payload);
       return state;
     },
-    setTemplateId(state, payload) {
-      // eslint-disable-next-line no-param-reassign
-      state.templateId = payload;
-      return state;
-    },
   },
 
   initialState: {
     data: [],
     saveAlways: true,
     lastItem: null,
-    answer : {},
-    templateId : '',
   },
 });
 

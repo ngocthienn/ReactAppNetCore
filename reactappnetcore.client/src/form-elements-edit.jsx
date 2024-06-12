@@ -83,20 +83,20 @@ export default class FormElementsEdit extends React.Component {
   addOptions() {
     const optionsApiUrl = document.getElementById('optionsApiUrl').value;
     if (optionsApiUrl) {
-      get(optionsApiUrl).then(data => {
-        this.props.element.options = [];
-        const { options } = this.props.element;
-        data.forEach(x => {
-          // eslint-disable-next-line no-param-reassign
-          x.key = ID.uuid();
-          options.push(x);
-        });
-        const this_element = this.state.element;
-        this.setState({
-          element: this_element,
-          dirty: true,
-        });
-      });
+      // get(optionsApiUrl).then(data => {
+      //   this.props.element.options = [];
+      //   const { options } = this.props.element;
+      //   data.forEach(x => {
+      //     // eslint-disable-next-line no-param-reassign
+      //     x.key = ID.uuid();
+      //     options.push(x);
+      //   });
+      //   const this_element = this.state.element;
+      //   this.setState({
+      //     element: this_element,
+      //     dirty: true,
+      //   });
+      // });
     }
   }
 
