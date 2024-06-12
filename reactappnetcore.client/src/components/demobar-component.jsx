@@ -2,7 +2,7 @@ import React from 'react';
 import store from '../stores/store';
 import { ReactFormGenerator } from '../react-form-builder2';
 
-const answers = {};
+const answers = [{"id": "4A15C8F3-1CF3-42DB-A64D-BC48AB12BA0F","name": "dropdown_536BC944-A7C8-484B-96C4-6F6DBC6A3E9F","custom_name": "dropdown_536BC944-A7C8-484B-96C4-6F6DBC6A3E9F","value": "place_holder_option_1"},{"id": "22AFB3CD-689A-4713-A7D5-69BC05233B04","name": "email_input_2B6670D9-6018-4EB1-AD10-1DDDD7501B86","custom_name": "email_input_2B6670D9-6018-4EB1-AD10-1DDDD7501B86","value": ""},{"id": "64104253-645F-46D6-83BE-FCC9332BEAB4","name": "radiobuttons_F3EA1866-1E73-43F9-8A86-8DB720232415","custom_name": "radiobuttons_F3EA1866-1E73-43F9-8A86-8DB720232415","value": ["radiobuttons_option_1D107B2E-18FF-4A3C-890E-C6865E634CB3"]}];
 // const answers = {
 //   'dropdown_38716F53-51AA-4A53-9A9B-367603D82548': 'd2',
 //   'checkboxes_8D6BDC45-76A3-4157-9D62-94B6B24BB833': [
@@ -14,6 +14,14 @@ const answers = {};
 //   ],
 //   'rating_3B3491B3-71AC-4A68-AB8C-A2B5009346CB': 4,
 // };
+const apiUrl = import.meta.env.VITE_API_URL;
+const answerUrl = `${apiUrl}/Answer/GetAnswerDefault/`;
+
+const headers = {
+  Accept: 'application/json',
+  'Content-Type': 'application/json; charset=utf-8',
+  OPTIONS: '',
+};
 
 export default class DemobarComponent extends React.Component {
   constructor(props) {
@@ -23,16 +31,44 @@ export default class DemobarComponent extends React.Component {
       previewVisible: false,
       shortPreviewVisible: false,
       roPreviewVisible: false,
+      answer: [],
+      answerId : '',
     };
+  }
 
+  // componentDidMount() {
+  //   const currentUrl = window.location.href;
+  //   const lastSegment = currentUrl.substring(currentUrl.lastIndexOf('/') + 1);
+
+  //   if(!isNaN(lastSegment)) {
+  //     store.dispatch('loadAnswer', { loadUrl: answerUrl + lastSegment });
+  //   }
+  // }
+
+  componentWillMount() {
     const update = this._onChange.bind(this);
     this._onSubmit = this._onSubmit.bind(this);
+    store.subscribe(state => {update(state.data)});
 
-    store.subscribe(state => update(state.data));
+    const currentUrl = window.location.href;
+    const lastSegment = currentUrl.substring(currentUrl.lastIndexOf('/') + 1);
+
+    if(!isNaN(lastSegment)) {
+      fetch(`${apiUrl}/Answer/GetAnswerDefault/${lastSegment}`, {
+        method: 'GET',
+        headers,
+      }).then(response => response.json())
+      .then(c => {
+        this.setState({
+          answer : c.answerData,
+          answerId : c.id,
+        });
+      });
+    }
   }
 
   showPreview() {
-    this.saveFormData();
+    // this.saveFormData();
     this.setState({
       previewVisible: true,
     });
@@ -68,8 +104,35 @@ export default class DemobarComponent extends React.Component {
 
   // eslint-disable-next-line no-unused-vars
   _onSubmit(data) {
-    // console.log('onSubmit', data);
-    // Place code to post json data to server here
+    
+    const currentUrl = window.location.href;
+    const lastSegment = currentUrl.substring(currentUrl.lastIndexOf('/') + 1);
+
+    if(!isNaN(lastSegment)) {
+      console.log(JSON.stringify({ 
+        id : parseInt(this.state.answerId), 
+        templateId: parseInt(lastSegment),
+        answerData : data,
+      }));
+      fetch(`${apiUrl}/Answer/UpdateAnswerDefaultWithTemplateId/${lastSegment}`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ 
+          id : parseInt(this.state.answerId), 
+          templateId: parseInt(lastSegment),
+          answerData : data,
+        }),
+      }).then(response => {
+        if (window.confirm("Update thành công")) {
+          window.location.reload();
+        } else {
+          window.location.reload();
+        }
+        
+      });
+    } else {
+      alert("Chưa save Template");
+    }
   }
 
   saveFormData() {
@@ -108,12 +171,12 @@ export default class DemobarComponent extends React.Component {
                   download_path=""
                   back_action="/"
                   back_name="Back"
-                  answer_data={answers}
+                  answer_data={this.state.answer}
                   action_name="Save"
-                  form_action="/api/form"
+                  form_action={this.props.answerUrl}
                   form_method="POST"
                   // skip_validations={true}
-                  // onSubmit={this._onSubmit}
+                  onSubmit={this._onSubmit}
                   variables={this.props.variables}
                   data={this.state.data}
                   locale='en'/>
