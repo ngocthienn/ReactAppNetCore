@@ -1,5 +1,5 @@
 /**
-  * <Form />
+  * <Form /> : Khi nhấn 'Preview Form' button
   */
 
 import React from 'react';
@@ -10,6 +10,7 @@ import FormValidator from './form-validator';
 import FormElements from './form-elements';
 import { TwoColumnRow, ThreeColumnRow, MultiColumnRow } from './multi-column';
 import { FieldSet } from './fieldset';
+import { TableInput } from './table-input'
 import CustomElement from './form-elements/custom-element';
 import Registry from './stores/registry';
 
@@ -85,6 +86,11 @@ class ReactForm extends React.Component {
       $item.value = ref.state.img;
     } else if (item.element === 'FileUpload') {
       $item.value = ref.state.fileUpload;
+    } if (item.element === 'MultiSelect') {
+      $item = ReactDOM.findDOMNode(ref.inputField.current);
+      if ($item && typeof $item.value === 'string') {
+        $item.value = JSON.parse(JSON.stringify($item.value));
+      }
     } else if (ref && ref.inputField && ref.inputField.current) {
       $item = ReactDOM.findDOMNode(ref.inputField.current);
       if ($item && typeof $item.value === 'string') {
@@ -385,11 +391,14 @@ class ReactForm extends React.Component {
       if (!item) return null;
       switch (item.element) {
         case 'TextInput':
+        case 'UserInput':
+        case 'TimeInput':
         case 'EmailInput':
         case 'PhoneNumber':
         case 'NumberInput':
         case 'TextArea':
         case 'Dropdown':
+        case 'MultiSelect':
         case 'DatePicker':
         case 'RadioButtons':
         case 'Rating':
@@ -398,6 +407,8 @@ class ReactForm extends React.Component {
           return this.getInputElement(item);
         case 'CustomElement':
           return this.getCustomElement(item);
+        case 'TableInput':
+          return this.getContainerElement(item, TableInput);
         case 'MultiColumnRow':
           return this.getContainerElement(item, MultiColumnRow);
         case 'ThreeColumnRow':

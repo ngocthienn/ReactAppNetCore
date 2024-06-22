@@ -11,6 +11,7 @@ import DatePicker from './date-picker';
 import ComponentHeader from './component-header';
 import ComponentLabel from './component-label';
 import myxss from './myxss';
+import { MultiSelect as MultiSelectComponent } from "react-multi-select-component";
 
 const FormElements = {};
 
@@ -92,6 +93,78 @@ class TextInput extends React.Component {
   render() {
     const props = {};
     props.type = 'text';
+    props.className = 'form-control';
+    props.name = this.props.data.field_name;
+    if (this.props.mutable) {
+      props.defaultValue = this.props.defaultValue;
+      props.ref = this.inputField;
+    }
+
+    let baseClasses = 'SortableItem rfb-item';
+    if (this.props.data.pageBreakBefore) { baseClasses += ' alwaysbreak'; }
+
+    if (this.props.read_only) {
+      props.disabled = 'disabled';
+    }
+
+    return (
+      <div style={{ ...this.props.style }} className={baseClasses}>
+        <ComponentHeader {...this.props} />
+        <div className="form-group">
+          <ComponentLabel {...this.props} />
+          <input {...props} />
+        </div>
+      </div>
+    );
+  }
+}
+
+class UserInput extends React.Component {
+  constructor(props) {
+    super(props);
+    this.inputField = React.createRef();
+  }
+
+  render() {
+    const props = {};
+    props.type = 'text';
+    props.className = 'form-control';
+    props.name = this.props.data.field_name;
+    if (this.props.mutable) {
+      props.defaultValue = this.props.defaultValue;
+      props.ref = this.inputField;
+    }
+
+    let baseClasses = 'SortableItem rfb-item';
+    if (this.props.data.pageBreakBefore) { baseClasses += ' alwaysbreak'; }
+
+    if (this.props.read_only) {
+      props.disabled = 'disabled';
+    }
+
+    return (
+      <div style={{ ...this.props.style }} className={baseClasses}>
+        <ComponentHeader {...this.props} />
+        <div className="form-group">
+          <ComponentLabel {...this.props} />
+          <button type='button'>add user</button>
+          <input {...props} />
+        </div>
+      </div>
+    );
+  }
+}
+
+
+class TimeInput extends React.Component {
+  constructor(props) {
+    super(props);
+    this.inputField = React.createRef();
+  }
+
+  render() {
+    const props = {};
+    props.type = 'time';
     props.className = 'form-control';
     props.name = this.props.data.field_name;
     if (this.props.mutable) {
@@ -298,6 +371,82 @@ class Dropdown extends React.Component {
     );
   }
 }
+
+class MultiSelect extends React.Component {
+  constructor(props) {
+    super(props);
+    this.inputField = React.createRef();
+    this.state = {
+      selected: this.props.defaultValue ? this.props.defaultValue : [],
+      stringSelected: '',
+      convertedOptions: this.convertOptions(this.props.data.options)
+    };
+    this.disabled = '';
+  }
+
+  setSelected = (selected) => {
+    this.setState({ selected, stringSelected: JSON.stringify(selected) });
+  }
+
+  convertOptions = (options) => {
+    return options.map(option => ({
+      value: option.value,
+      label: option.text
+    }));
+  }
+
+  componentDidUpdate(prevProps) {
+    if (prevProps.data.options !== this.props.data.options) {
+      const convertedOptions = this.convertOptions(this.props.data.options);
+      this.setState({ convertedOptions });
+    }
+
+    if (prevProps.defaultValue !== this.props.defaultValue) {
+      this.setState({ selected: this.props.defaultValue, stringSelected: JSON.stringify(this.props.defaultValue) });
+    }
+  }
+
+  handleSelectChange = () => {}
+
+  render() {
+    const props = {
+      className: 'form-select',
+      name: this.props.data.field_name
+    };
+
+    if (this.props.mutable) {
+      props.ref = this.inputField;
+    }
+
+    if (this.props.read_only) {
+      props.disabled = 'disabled';
+      this.disabled = 'disabled';
+    }
+
+    let baseClasses = 'SortableItem rfb-item background-none';
+    if (this.props.data.pageBreakBefore) {
+      baseClasses += ' alwaysbreak';
+    }
+
+    return (
+      <div style={{ ...this.props.style }} className={baseClasses}>
+        <ComponentHeader {...this.props} />
+        <div className="form-group">
+          <ComponentLabel {...this.props} />
+          <MultiSelectComponent disabled={this.disabled}
+            options={this.state.convertedOptions}
+            value={this.state.selected}
+            onChange={this.setSelected}
+            labelledBy="Select"
+            overrideStrings={this.props.data.overrideStrings}
+          />
+          <input {...props} type='text' value={this.state.stringSelected} onChange={this.handleSelectChange} style={{ display: 'none' }} readOnly/>
+        </div>
+      </div>
+    );
+  }
+}
+
 
 class Signature extends React.Component {
   constructor(props) {
@@ -932,11 +1081,14 @@ FormElements.Paragraph = Paragraph;
 FormElements.Label = Label;
 FormElements.LineBreak = LineBreak;
 FormElements.TextInput = TextInput;
+FormElements.UserInput = UserInput;
+FormElements.TimeInput = TimeInput;
 FormElements.EmailInput = EmailInput;
 FormElements.PhoneNumber = PhoneNumber;
 FormElements.NumberInput = NumberInput;
 FormElements.TextArea = TextArea;
 FormElements.Dropdown = Dropdown;
+FormElements.MultiSelect = MultiSelect;
 FormElements.Signature = Signature;
 FormElements.Checkboxes = Checkboxes;
 FormElements.DatePicker = DatePicker;

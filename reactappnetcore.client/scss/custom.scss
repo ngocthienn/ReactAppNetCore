@@ -161,3 +161,60 @@ input[type="checkbox" i] {
 .form-group {
   margin-bottom: 1rem;
 }
+
+.td-form-builder .form-label span {
+  background: none!important;
+}
+
+.scroll-container {
+  overflow-x: auto; /* Cho phép cuộn ngang */
+  overflow-y: hidden; /* Ẩn cuộn dọc nếu có */
+  white-space: nowrap; /* Đảm bảo các phần tử không bị xuống dòng */
+}
+
+.background-none {
+  label {
+    span {
+      background: none!important;
+    }
+  }
+}
+
+// Multi Select css
+.form-group {
+  .multi-select {
+    .dropdown-container {
+      .dropdown-heading {
+        .dropdown-heading-value {
+          span {
+            font-size: 1rem;
+            font-weight: 400;
+            line-height: 1.5;
+            color: #495057;
+          }
+        }
+      }
+    }
+  }
+}
+// .table-responsive {
+//   overflow: auto;
+//   max-height: 400px; /* Đặt chiều cao tối đa cho bảng, có thể thay đổi tùy ý */
+//   white-space: nowrap;
+// }
+
+// .table-form-builder {
+//   font-family: arial, sans-serif;
+//   border-collapse: collapse;
+//   width: 100%;
+// }
+
+// .td-th-form-builder {
+//   border: 1px solid #dddddd;
+//   text-align: left;
+//   padding: 8px;
+// }
+
+// .tr-form-builder:nth-child(even) {
+//   background-color: #dddddd;
+// }

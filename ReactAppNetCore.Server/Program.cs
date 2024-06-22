@@ -14,6 +14,7 @@ builder.Services.AddCors();
 builder.Services.AddDbContext<FormDBContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddControllers().AddJsonOptions(options => options.JsonSerializerOptions.PropertyNameCaseInsensitive = true);
+builder.Services.AddAutoMapper(typeof(Program));
 
 var app = builder.Build();
 
@@ -22,17 +23,15 @@ app.UseStaticFiles();
 
 app.UseCors(builder =>
 {
-    builder.WithOrigins("https://localhost:5173")
+    builder.WithOrigins("https://localhost:5173", "https://127.0.0.1:5173", "https://localhost:7298", "https://127.0.0.1:7298")
            .AllowAnyHeader()
-           .AllowAnyMethod();
+           .AllowAnyMethod()
+           .AllowCredentials();
 });
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
 

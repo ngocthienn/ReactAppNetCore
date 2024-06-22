@@ -56,10 +56,13 @@
   "paragraph" : "Paragraph",
   "line-break" : "Line Break",
   "dropdown" : "Dropdown",
+  "multiselect" : "MultiSelect",
   "tags": "Tags",
   "checkboxes" : "Checkboxes",
   "multiple-choice":"Multiple Choice",
   "text-input":"Text Input",
+  "user-input":"User Input",
+  "time-input":"Time Input",
   "email-input":"Email",
   "phone-input":"Phone Number",
   "number-input":"Number Input",
@@ -88,14 +91,29 @@
   "easy": "Easy",
   "difficult": "Difficult",
   "drop-zone": "Dropzone",
+  "table-input": "Table Input",
+  "table-label": "Table Label",
+  "column-1": "Column 1",
+  "column-2": "Column 2",
+  "column-3": "Column 3",
+  "row-count": "Row Count",
+  "columns" : "Columns",
 
   "message.is-required": "is required",
   "message.was-answered-incorrectly": "was answered incorrectly",
   "message.was-not-registered": "was not registered",
   "message.invalid-email": "field requires valid email address",
-  "message.invalid-phone-number": "field requires a valid phone number"
+  "message.invalid-phone-number": "field requires a valid phone number",
 
-
+  "allItemsAreSelected": "All items are selected.",
+  "clearSearch": "Clear Search",
+  "clearSelected": "Clear Selected",
+  "noOptions": "No options",
+  "search": "Search",
+  "selectAll": "Select All",
+  "selectAllFiltered": "Select All (Filtered)",
+  "selectSomeItems": "Select...",
+  "create": "Create"
 
 
 

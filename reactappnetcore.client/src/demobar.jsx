@@ -2,18 +2,9 @@ import React from 'react';
 import store from './stores/store';
 import { ReactFormGenerator } from './index';
 
+const locale = import.meta.env.VITE_DEFAULT_LOCALE;
+const language = locale ? locale : 'en';
 const answers = {};
-// const answers = {
-//   'dropdown_38716F53-51AA-4A53-9A9B-367603D82548': 'd2',
-//   'checkboxes_8D6BDC45-76A3-4157-9D62-94B6B24BB833': [
-//     'checkboxes_option_8657F4A6-AA5A-41E2-A44A-3E4F43BFC4A6',
-//     'checkboxes_option_1D674F07-9E9F-4143-9D9C-D002B29BA9E4',
-//   ],
-//   'radio_buttons_F79ACC6B-7EBA-429E-870C-124F4F0DA90B': [
-//     'radiobuttons_option_553B2710-AD7C-46B4-9F47-B2BD5942E0C7',
-//   ],
-//   'rating_3B3491B3-71AC-4A68-AB8C-A2B5009346CB': 4,
-// };
 
 export default class Demobar extends React.Component {
   constructor(props) {
@@ -128,7 +119,7 @@ export default class Demobar extends React.Component {
                   // onSubmit={this._onSubmit}
                   variables={this.props.variables}
                   data={this.state.data}
-                  locale='en'/>
+                  locale= {language}/>
 
                 <div className="modal-footer">
                   <button type="button" className="btn btn-default" data-dismiss="modal" onClick={this.closePreview.bind(this)}>Close</button>
@@ -154,7 +145,7 @@ export default class Demobar extends React.Component {
                   variables={this.props.variables}
                   hide_actions={true}
                   data={this.state.data}
-                  locale='en'/>
+                  locale= {language}/>
 
                 <div className="modal-footer">
                   <button type="button" className="btn btn-default" data-dismiss="modal" onClick={this.closePreview.bind(this)}>Close</button>
@@ -178,7 +169,7 @@ export default class Demobar extends React.Component {
                   display_short={true}
                   variables={this.props.variables}
                   hide_actions={false}
-                  locale='en'
+                  locale= {language}
                   />
 
                 <div className="modal-footer">

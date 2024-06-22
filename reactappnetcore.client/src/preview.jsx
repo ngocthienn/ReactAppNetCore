@@ -8,6 +8,7 @@ import store from './stores/store';
 import FormElementsEdit from './form-dynamic-edit';
 import SortableFormElements from './sortable-form-elements';
 import CustomDragLayer from './form-elements/component-drag-layer';
+import ID from './UUID';
 
 const { PlaceHolder } = SortableFormElements;
 
@@ -42,7 +43,7 @@ export default class Preview extends React.Component {
   componentDidMount() {
     const { data, url, saveUrl, saveAlways } = this.props;
     store.subscribe(state => this._onUpdate(state.data));
-    store.dispatch('load', { loadUrl: url, saveUrl, data: data || [], saveAlways });
+    // store.dispatch('load', { loadUrl: url, saveUrl, data: data || [], saveAlways });
     document.addEventListener('mousedown', this.editModeOff);
   }
 
@@ -70,14 +71,56 @@ export default class Preview extends React.Component {
   }
 
   updateElement(element) {
-    const { data } = this.state;
+    let { data } = this.state;
     let found = false;
 
+    let deleteElement = [];
+    let addElement = [];
+    let addLength = 0;
+    let elementTable = null;
+    let indexTableInData = -1;
     for (let i = 0, len = data.length; i < len; i++) {
       if (element.id === data[i].id) {
+        if(element.element === "TableInput") {
+          const rowCount = parseInt(element.rowCount);
+          const prevRowCount = parseInt(element.prevRowCount);
+          if(rowCount < prevRowCount) {
+            let newChildItems = Array.from({ length: rowCount * element.options.length }, (_, index) => {
+              return index < element.childItems.length ? element.childItems[index] : null;
+            });
+            deleteElement = newChildItems.filter(item => item !== null && !element.childItems.includes(item));
+            deleteElement = deleteElement.filter(item => item !== null);
+          } else if(rowCount > prevRowCount) {
+            addLength = (rowCount - prevRowCount) * element.options.length;
+            let copiedChildItems = [...element.childItems];
+            addElement = copiedChildItems.splice(0, element.options.length);
+          }
+          element.prevRowCount = rowCount;
+        }
+        indexTableInData = i;
+        elementTable = element;
         data[i] = element;
         found = true;
         break;
+      }
+    }
+
+    if(elementTable.element === "TableInput") {
+      if(deleteElement.length > 0) {
+        data = data.filter(item => !deleteElement.includes(item.id));
+      }
+  
+      if(addElement.length > 0) {
+        for(let i = 0; i < addLength; i++) {
+          let indexAddElement = i % element.options.length;
+          let itemNeedFind = data.find(item => item.id === addElement[indexAddElement]);
+          let copiedItem = { ...itemNeedFind };
+          copiedItem.id = ID.uuid();
+          copiedItem.field_name = copiedItem.field_name.split("_")[0] + ID.uuid();
+          data.push(copiedItem);
+          elementTable.childItems.push(copiedItem.id);
+        }
+        data[indexTableInData] = elementTable;
       }
     }
 
@@ -151,6 +194,10 @@ export default class Preview extends React.Component {
     item.childItems[col] = child.id; child.col = col;
     // eslint-disable-next-line no-param-reassign
     child.parentId = item.id;
+    if(item.element === "TableInput") {
+      child.column = item.options[Math.floor(parseInt(col) / parseInt(item.options.length))];
+    }
+    
     // eslint-disable-next-line no-param-reassign
     child.parentIndex = data.indexOf(item);
     if (oldParent) {
@@ -279,7 +326,7 @@ export default class Preview extends React.Component {
         <div className="edit-form" ref={this.editForm}>
           {this.props.editElement !== null && this.showEditForm()}
         </div>
-        <div className="Sortable">{items}</div>
+        <div className="Sortable scroll-container">{items}</div>
         <PlaceHolder id="form-place-holder" show={items.length === 0} index={items.length} moveCard={this.cardPlaceHolder} insertCard={this.insertCard} />
         <CustomDragLayer/>
       </div>

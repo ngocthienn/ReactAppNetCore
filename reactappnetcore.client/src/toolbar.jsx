@@ -68,6 +68,18 @@ class Toolbar extends React.Component {
           { value: 'place_holder_option_2', text: intl.formatMessage({ id: 'place-holder-option-2' }), key: `dropdown_option_${ID.uuid()}` },
           { value: 'place_holder_option_3', text: intl.formatMessage({ id: 'place-holder-option-3' }), key: `dropdown_option_${ID.uuid()}` },
         ];
+      case 'MultiSelect':
+        return [
+          { value: 'place_holder_option_1', text: intl.formatMessage({ id: 'place-holder-option-1' }), key: `${ID.uuid()}` },
+          { value: 'place_holder_option_2', text: intl.formatMessage({ id: 'place-holder-option-2' }), key: `${ID.uuid()}` },
+          { value: 'place_holder_option_3', text: intl.formatMessage({ id: 'place-holder-option-3' }), key: `${ID.uuid()}` },
+        ];
+      case 'TableInput':
+        return [
+          { value: 'column_1', text: intl.formatMessage({ id: 'column-1' }), key: `${ID.uuid()}` },
+          { value: 'column_2', text: intl.formatMessage({ id: 'column-2' }), key: `${ID.uuid()}` },
+          { value: 'column_3', text: intl.formatMessage({ id: 'column-3' }), key: `${ID.uuid()}` },
+        ];
       case 'Tags':
         return [
           { value: 'place_holder_tag_1', text: intl.formatMessage({ id: 'place-holder-tag-1' }), key: `tags_option_${ID.uuid()}` },
@@ -130,6 +142,26 @@ class Toolbar extends React.Component {
         options: [],
       },
       {
+        key: 'MultiSelect',
+        canHaveAnswer: true,
+        name: intl.formatMessage({ id: 'multiselect' }),
+        icon: 'fas fa-caret-square-down',
+        label: intl.formatMessage({ id: 'place-holder-label' }),
+        field_name: 'multiselect_',
+        options: [],
+        overrideStrings : {
+          search : intl.formatMessage({ id: 'search' }),
+          allItemsAreSelected: intl.formatMessage({ id: 'allItemsAreSelected' }),
+          clearSearch: intl.formatMessage({ id: 'clearSearch' }),
+          clearSelected: intl.formatMessage({ id: 'clearSelected' }),
+          noOptions: intl.formatMessage({ id: 'noOptions' }),
+          selectAll: intl.formatMessage({ id: 'selectAll' }),
+          selectAllFiltered: intl.formatMessage({ id: 'selectAllFiltered' }),
+          selectSomeItems: intl.formatMessage({ id: 'selectSomeItems' }),
+          create: intl.formatMessage({ id: 'create' }),
+        }
+      },
+      {
         key: 'Tags',
         canHaveAnswer: true,
         name: intl.formatMessage({ id: 'tags' }),
@@ -165,6 +197,22 @@ class Toolbar extends React.Component {
         field_name: 'text_input_',
       },
       {
+        key: 'UserInput',
+        canHaveAnswer: true,
+        name: intl.formatMessage({ id: 'user-input' }),
+        label: intl.formatMessage({ id: 'place-holder-label' }),
+        icon: 'fas fa-user',
+        field_name: 'user_input_',
+      },
+      {
+        key: 'TimeInput',
+        canHaveAnswer: true,
+        name: intl.formatMessage({ id: 'time-input' }),
+        label: intl.formatMessage({ id: 'place-holder-label' }),
+        icon: 'fas fa-clock',
+        field_name: 'time_input_',
+      },
+      {
         key: 'EmailInput',
         canHaveAnswer: true,
         name: intl.formatMessage({ id: 'email-input' }),
@@ -195,6 +243,19 @@ class Toolbar extends React.Component {
         label: intl.formatMessage({ id: 'place-holder-label' }),
         icon: 'fas fa-text-height',
         field_name: 'text_area_',
+      },
+      {
+        key: 'TableInput',
+        canHaveAnswer: true,
+        canPopulateFromApi : false,
+        canHaveOptionValue : false,
+        name: intl.formatMessage({ id: 'table-input' }),
+        label: intl.formatMessage({ id: 'table-label' }),
+        icon: 'fas fa-table',
+        field_name: 'table_input_',
+        options: [],
+        rowCount: 1,
+        prevRowCount: 1,
       },
       {
         key: 'FieldSet',
@@ -428,6 +489,15 @@ class Toolbar extends React.Component {
       elementOptions.col_count = item.col_count;
     }
 
+    if(elementKey === 'TableInput') {
+      elementOptions.rowCount = item.rowCount;
+      elementOptions.prevRowCount = item.prevRowCount;
+    }
+
+    if(elementKey === 'MultiSelect') {
+      elementOptions.overrideStrings = item.overrideStrings ;
+    }
+
     if (item.defaultValue) { elementOptions.defaultValue = item.defaultValue; }
 
     if (item.field_name) { elementOptions.field_name = item.field_name + ID.uuid(); }
@@ -447,7 +517,10 @@ class Toolbar extends React.Component {
 
   _onClick(item) {
     // ElementActions.createElement(this.create(item));
-    store.dispatch('create', this.create(item));
+    console.log("item", JSON.stringify(item));
+    let createItem = this.create(item);
+    console.log(createItem.element, JSON.stringify(createItem));
+    store.dispatch('create', createItem);
   }
 
   renderItem = (item) => (<ToolbarItem data={item} key={item.key} onClick={this._onClick.bind(this, item)} onCreate={this.create} />)

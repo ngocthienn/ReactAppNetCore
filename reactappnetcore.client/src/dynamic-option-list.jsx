@@ -65,12 +65,38 @@
 
    addOption(index) {
      const this_element = this.state.element;
+     if(this_element.element === "TableInput") {
+      let col = this_element.options.length;
+      const resChildItems = [];
+      let multiple = 0;
+      for (let i = 0; i < this_element.childItems.length; i++) {
+        resChildItems.push(this_element.childItems[i]);
+        if(i == index + col * multiple) {
+          resChildItems.push(null);
+          multiple++;
+        }
+      }
+      this_element.childItems = resChildItems;
+     }
      this_element.options.splice(index + 1, 0, { value: '', text: '', key: ID.uuid() });
      this.props.updateElement.call(this.props.preview, this_element);
    }
 
    removeOption(index) {
      const this_element = this.state.element;
+     if(this_element.element === "TableInput") {
+      let col = this_element.options.length;
+      const resChildItems = [];
+      let multiple = 0;
+      for (let i = 0; i < this_element.childItems.length; i++) {
+        if(i == index + col * multiple) {
+          multiple++;
+        } else {
+          resChildItems.push(this_element.childItems[i]);
+        }
+      }
+      this_element.childItems = resChildItems;
+     }
      this_element.options.splice(index, 1);
      this.props.updateElement.call(this.props.preview, this_element);
    }
@@ -84,7 +110,12 @@
          <ul>
            <li>
              <div className="row">
-               <div className="col-sm-6"><b><IntlMessages id='options' /></b></div>
+                {this.props.element.element === "TableInput" ? (
+                  <div className="col-sm-6"><b><IntlMessages id='columns' /></b></div>
+                ) : (
+                  <div className="col-sm-6"><b><IntlMessages id='options' /></b></div>
+                )}
+               {/* <div className="col-sm-6"><b><IntlMessages id='options' /></b></div> */}
                { this.props.canHaveOptionValue &&
                <div className="col-sm-2"><b><IntlMessages id='value' /></b></div> }
                { this.props.canHaveOptionValue && this.props.canHaveOptionCorrect &&

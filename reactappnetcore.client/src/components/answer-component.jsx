@@ -12,6 +12,8 @@ const headers = {
 };
 
 const apiUrl = import.meta.env.VITE_API_URL;
+const locale = import.meta.env.VITE_DEFAULT_LOCALE;
+const language = locale ? locale : 'en';
 
 const Answer = () => {
     const [data, setData] = useState([]);
@@ -20,9 +22,7 @@ const Answer = () => {
     const [id, setId] = useState('');
 
     const location = useLocation();
-
-
-
+    
     useEffect(() => {
         let Id = parseInt(location.pathname.replace("/Answer/", ""));
         const fetchData = async () => {
@@ -102,7 +102,7 @@ const Answer = () => {
                     onSubmit={onSubmit}
                     variables={variables}
                     data={data}
-                    locale="en"
+                    locale={language}
                 />
             ) : <AnswerForm answerData={[]} variables={variables} data={data} onSubmit={onSubmit}/>}
         </>
