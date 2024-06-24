@@ -2,7 +2,7 @@
   * <ReactFormBuilder />
 */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { IntlProvider } from 'react-intl';
@@ -98,6 +98,21 @@ class ReactFormBuilder extends React.Component {
 function ReactFormGenerator(props) {
   const language = props.locale ? props.locale : 'en';
   const currentAppLocale = AppLocale[language];
+
+  useEffect(() => {
+    // xóa event input được sinh ra từ vite gây textarea không xuống hàng
+    const elements = document.querySelectorAll('.SortableItem .form-group textarea.form-control');
+    if(elements.length > 0) {
+      elements.forEach(element => {
+        element.addEventListener('input', (e) => {
+            console.log("event input", e);
+            e.stopImmediatePropagation();
+            e.stopPropagation();
+        }, true);
+      });
+    }
+  }, [])
+  
   return (
     <IntlProvider
       locale={currentAppLocale.locale}

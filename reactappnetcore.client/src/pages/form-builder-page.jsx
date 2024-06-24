@@ -15,7 +15,6 @@ const language = locale ? locale : 'en';
 const FormBuilderPage = React.memo(() => {
     const location = useLocation();
     const myRef = useRef(null);
-    const [taskData, setTaskData] = useState([]);
 
     const formBuilderRef = useRef(null);
 
@@ -27,7 +26,6 @@ const FormBuilderPage = React.memo(() => {
         } else {
             store.dispatch('setTemplateId', '');
         }
-        // store.subscribe(state => onUpdateByStore(state));
     }, [location])
 
     return (
@@ -35,28 +33,13 @@ const FormBuilderPage = React.memo(() => {
         <div ref={myRef}>
             <NavBar />
             <DemoBarComponent variables={variables} />
-            {
-                taskData.length > 0 ?
-                    (<ReactFormBuilder
-                        key={nanoid()}
-                        variables={variables}
-                        // url={url}
-                        // saveUrl={saveUrl}
-                        locale={language}
-                        saveAlways={true}
-                        data={taskData}
-                        ref={formBuilderRef}
-                    />) : <ReactFormBuilder
-                        key={nanoid()}
-                        variables={variables}
-                        // url={url}
-                        // saveUrl={saveUrl}
-                        locale={language}
-                        saveAlways={true}
-                        data={[]}
-                        ref={formBuilderRef}
-                    />
-            }
+            <ReactFormBuilder
+                key={nanoid()}
+                variables={variables}
+                locale={language}
+                saveAlways={true}
+                ref={formBuilderRef}
+            />
         </div>
 
     );
