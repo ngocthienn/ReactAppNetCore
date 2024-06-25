@@ -1,97 +1,169 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using AutoMapper;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ReactAppNetCore.Server.DTOs;
 using ReactAppNetCore.Server.Models;
 using ReactAppNetCore.Server.Repositories;
-using System.Text.Json;
 
 namespace ReactAppNetCore.Server.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AnswerController : ControllerBase
+    public class AnswersController : ControllerBase
     {
-        private readonly FormDBContext _formDBContext;
+        private readonly FormDBContext _context;
+        private readonly IMapper _mapper;
 
-        public AnswerController(FormDBContext formDBContext)
+        public AnswersController(FormDBContext context, IMapper mapper)
         {
-            _formDBContext = formDBContext;
+            _context = context;
+            _mapper = mapper;
         }
 
-        [HttpGet("[action]")]
-        public async Task<ActionResult<IEnumerable<Answer>>> GetAllAnswer()
+        // GET: api/Answers
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<AnswerDTO>>> GetAnswers()
         {
-            var answer = await _formDBContext.Answers.Where(c => c.defaulFlag == false).ToListAsync();
-            return Ok(answer);
+            var res = await _context.Answers.ToListAsync();
+            return _mapper.Map<List<AnswerDTO>>(res);
         }
 
+        // GET: api/Answers/5
+        [HttpGet("{id}")]
+        public async Task<ActionResult<AnswerDTO>> GetAnswer(int id)
+        {
+            var answer = await _context.Answers.FindAsync(id);
+
+            if (answer == null)
+            {
+                return NotFound();
+            }
+
+            return _mapper.Map<AnswerDTO>(answer);
+        }
+
+        // GET: api/Answers/GetAnswerDefault/5
+        [HttpGet("[action]/{templateId}")]
+        public async Task<ActionResult<AnswerDTO>> GetAnswerDefault(int templateId)
+        {
+            var answer = await _context.Answers
+                                              .FirstOrDefaultAsync(c => c.templateId == templateId && c.defaultFlag == true);
+            return Ok(_mapper.Map<AnswerDTO>(answer));
+        }
+
+        // GET: api/Answers/GetAnswerNotDefault/5
         [HttpGet("[action]/{id}")]
-        public async Task<ActionResult<Answer>> GetAnswerDefault(int id)
+        public async Task<ActionResult<AnswerDTO>> GetAnswerNotDefault(int templateId)
         {
-            var answer = await _formDBContext.Answers
-                                              .FirstOrDefaultAsync(c => c.templateId == id && c.defaulFlag == true);
-            return Ok(answer);
+            var answer = await _context.Answers
+                                              .FirstOrDefaultAsync(c => c.Id == templateId && c.defaultFlag == false);
+            return Ok(_mapper.Map<AnswerDTO>(answer));
         }
 
-
-        [HttpGet("[action]/{id}")]
-        public async Task<ActionResult<Answer>> GetAnswerNotDefault(int id)
+        // PUT: api/Answers/5
+        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [HttpPut("{id}")]
+        public async Task<IActionResult> PutAnswer(int id, AnswerDTO answerDTO)
         {
-            var answer = await _formDBContext.Answers
-                                              .FirstOrDefaultAsync(c => c.Id == id && c.defaulFlag == false);
-            return Ok(answer);
+            var answer = _mapper.Map<AnswerDTO>(answerDTO);
+            if (id != answer.Id)
+            {
+                return BadRequest();
+            }
+
+            _context.Entry(answer).State = EntityState.Modified;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!AnswerExists(id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            return NoContent();
+        }
+
+        // POST: api/Answers
+        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [HttpPost]
+        public async Task<ActionResult<AnswerDTO>> PostAnswer(AnswerDTO answerDTO)
+        {
+            var answer = _mapper.Map<Answer>(answerDTO);
+            _context.Answers.Add(answer);
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction("GetAnswer", new { id = answer.Id }, answerDTO);
+        }
+
+        // DELETE: api/Answers/5
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteAnswer(int id)
+        {
+            var answer = await _context.Answers.FindAsync(id);
+            if (answer == null)
+            {
+                return NotFound();
+            }
+
+            _context.Answers.Remove(answer);
+            await _context.SaveChangesAsync();
+
+            return NoContent();
         }
 
         [HttpPost("[action]/{templateId}")]
         public async Task<ActionResult> UpdateAnswerDefaultWithTemplateId(int templateId, [FromBody] AnswerDTO answerUpdate)
         {
-            var answer = await _formDBContext.Answers
-                                              .FirstOrDefaultAsync(c => c.templateId == templateId && c.defaulFlag == true);
-            if(answer == null) 
+            var answer = await _context.Answers
+                                              .FirstOrDefaultAsync(c => c.templateId == templateId && c.defaultFlag == true);
+            if (answer == null)
             {
                 answer = new Answer();
                 answer.templateId = templateId;
-                answer.defaulFlag = true;
+                answer.defaultFlag = true;
                 answer.username = "admin";
+                answer.answerData = answerUpdate.answerData;
+                _context.Answers.Add(answer);
             }
-            answer.answerData = answerUpdate.answerData;
-            _formDBContext.Answers.Update(answer);
-            _formDBContext.SaveChanges();
+            else
+            {
+                answer.answerData = answerUpdate.answerData;
+                _context.Answers.Update(answer);
+            }
+            _context.SaveChanges();
             return Ok();
         }
 
         [HttpPost("[action]/{id}")]
         public async Task<ActionResult> AddAnswerNotDefaultWithId(int id, [FromBody] AnswerDTO answerUpdate)
         {
-            var answer = new Answer();
+            var answer = _mapper.Map<Answer>(answerUpdate);
             answer.templateId = id;
             answer.username = "username";
-            answer.defaulFlag = false;
+            answer.defaultFlag = false;
             answer.answerData = answerUpdate.answerData;
-            _formDBContext.Answers.Update(answer);
-            _formDBContext.SaveChanges();
+            _context.Answers.Update(answer);
+            _context.SaveChanges();
             return Ok();
         }
 
-        //[HttpPost("[action]/{id}")]
-        //public async Task<ActionResult> UpdateOrAddAnswerNotDefaultWithId(int id, [FromBody] AnswerDTO answerUpdate)
-        //{
-        //    var answer = await _formDBContext.Answers
-        //                                      .FirstOrDefaultAsync(c => c.Id == id 
-        //                                        && c.defaulFlag == false
-        //                                        && c.templateId == answerUpdate.templateId);
-        //    if (answer == null)
-        //    {
-        //        answer = new Answer();
-        //        answer.templateId = answerUpdate.templateId;
-        //        answer.username = "username";
-        //    }
-        //    answer.defaulFlag = false;
-        //    answer.answerData = answerUpdate.answerData;
-        //    _formDBContext.Answers.Update(answer);
-        //    _formDBContext.SaveChanges();
-        //    return Ok();
-        //}
+        private bool AnswerExists(int id)
+        {
+            return _context.Answers.Any(e => e.Id == id);
+        }
     }
 }

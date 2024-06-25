@@ -36,9 +36,9 @@ namespace ReactAppNetCore.Server.Migrations
                         .HasColumnType("json")
                         .HasColumnName("answer_data");
 
-                    b.Property<bool>("defaulFlag")
+                    b.Property<bool>("defaultFlag")
                         .HasColumnType("boolean")
-                        .HasColumnName("defaul_flag");
+                        .HasColumnName("default_flag");
 
                     b.Property<int>("templateId")
                         .HasColumnType("integer")
@@ -93,6 +93,33 @@ namespace ReactAppNetCore.Server.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("template");
+                });
+
+            modelBuilder.Entity("ReactAppNetCore.Server.Models.User", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("name")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("name");
+
+                    b.Property<string>("username")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("username");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("username")
+                        .IsUnique();
+
+                    b.ToTable("user");
                 });
 
             modelBuilder.Entity("ReactAppNetCore.Server.Models.Answer", b =>

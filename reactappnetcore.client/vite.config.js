@@ -7,6 +7,13 @@ import path from 'path';
 import child_process from 'child_process';
 import { env } from 'process';
 
+import reactRefresh from '@vitejs/plugin-react-refresh';
+import {nodePolyfills} from 'vite-plugin-node-polyfills';
+import commonjs from '@rollup/plugin-commonjs';
+import svgr from 'vite-plugin-svgr';
+import { nodeResolve } from '@rollup/plugin-node-resolve';
+import requireTransform from 'vite-plugin-require-transform';
+
 const baseFolder =
     env.APPDATA !== undefined && env.APPDATA !== ''
         ? `${env.APPDATA}/ASP.NET/https`
@@ -35,16 +42,46 @@ const target = env.ASPNETCORE_HTTPS_PORT ? `https://localhost:${env.ASPNETCORE_H
 
 // https://vitejs.dev/config/
 export default defineConfig({
-    plugins: [plugin()],
+    plugins: [
+        plugin(), 
+        reactRefresh(), 
+        nodePolyfills(),
+        commonjs({
+            include: /node_modules/,
+            transformMixedEsModules: true
+          }),
+        nodeResolve({
+            browser: true,
+            preferBuiltins: false,
+        }),
+        svgr(),
+        requireTransform({
+            fileRegex: /.js$|.jsx$|.ts$|.tsx$/
+          })
+    ],
     resolve: {
         alias: {
-            '@': fileURLToPath(new URL('./src', import.meta.url))
+            '@': fileURLToPath(new URL('./src', import.meta.url)),
         }
     },
-    define: {
-        // By default, Vite doesn't include shims for NodeJS/
-        // necessary for segment analytics lib to work
-        global: {},
+    optimizeDeps: {
+        include: [
+            'react',
+            'react-dom',
+            'react-router-dom',
+            'react-redux',
+            'react-is',
+            'vite-plugin-node-polyfills/shims/buffer',
+            'vite-plugin-node-polyfills/shims/global',
+            'vite-plugin-node-polyfills/shims/process',
+        ],
+        esbuildOptions: {
+            // Node.js global to browser globalThis
+            define: {
+                global: 'globalThis',
+                process: 'process',
+            },
+        },
     },
     server: {
         proxy: {

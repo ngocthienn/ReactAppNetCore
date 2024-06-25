@@ -1,90 +1,159 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using AutoMapper;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json.Linq;
 using ReactAppNetCore.Server.DTOs;
 using ReactAppNetCore.Server.Models;
 using ReactAppNetCore.Server.Repositories;
-using System.Text.Json;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace ReactAppNetCore.Server.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class TemplateController : ControllerBase
+    public class TemplatesController : ControllerBase
     {
-        private readonly FormDBContext _formDBContext;
+        private readonly FormDBContext _context;
+        private readonly IMapper _mapper;
 
-        public TemplateController(FormDBContext formDBContext)
+        public TemplatesController(FormDBContext context, IMapper mapper)
         {
-            _formDBContext = formDBContext;
+            _context = context;
+            _mapper = mapper;
         }
 
-        [HttpGet("[action]")]
-        public async Task<ActionResult<IEnumerable<Template>>> GetTemplates()
+        // GET: api/Templates
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<TemplateDTO>>> GetTemplates()
         {
-            return await _formDBContext.Templates.ToListAsync();
+            var res = await _context.Templates.ToListAsync();
+            return _mapper.Map<List<TemplateDTO>>(res);
         }
 
-        [HttpGet("[action]")]
-        public async Task<ActionResult<IEnumerable<Control>>> GetControls()
+        // GET: api/Templates/5
+        [HttpGet("{id}")]
+        public async Task<ActionResult<TemplateDTO>> GetTemplate(int id)
         {
-            return await _formDBContext.Controls.OrderBy(c => c.fieldNo).ToListAsync();
+            var template = await _context.Templates.FindAsync(id);
+
+            if (template == null)
+            {
+                return NotFound();
+            }
+
+            return _mapper.Map<TemplateDTO>(template);
         }
 
-        [HttpGet("[action]/{id}")]
-        public async Task<ActionResult<IEnumerable<Control>>> GetControl(int id)
+        // PUT: api/Templates/5
+        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [HttpPut("{id}")]
+        public async Task<IActionResult> PutTemplate(int id, TemplateDTO templateDTO)
         {
-            return await _formDBContext.Controls.Where(c => c.templateId == id).OrderBy(c => c.fieldNo).ToListAsync();
+            var template = _mapper.Map<TemplateDTO>(templateDTO);
+            if (id != template.Id)
+            {
+                return BadRequest();
+            }
+
+            _context.Entry(template).State = EntityState.Modified;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!TemplateExists(id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            return NoContent();
+        }
+
+        // POST: api/Templates
+        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [HttpPost]
+        public async Task<ActionResult<TemplateDTO>> PostTemplate(TemplateDTO templateDTO)
+        {
+            var template = _mapper.Map<Template>(templateDTO);
+            _context.Templates.Add(template);
+            await _context.SaveChangesAsync();
+            var res = _mapper.Map<TemplateDTO>(template);
+
+            return CreatedAtAction("GetTemplate", new { id = template.Id }, templateDTO);
+        }
+
+        // DELETE: api/Templates/5
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteTemplate(int id)
+        {
+            var template = await _context.Templates.FindAsync(id);
+            if (template == null)
+            {
+                return NotFound();
+            }
+
+            _context.Templates.Remove(template);
+            await _context.SaveChangesAsync();
+
+            return NoContent();
         }
 
         [HttpPost("[action]/{id?}")]
-        public async Task<ActionResult> UpdateControlWithTemplateId(int? id, [FromBody] List<ControlDTO> itemsToUpdate)
+        public async Task<ActionResult> AddOrUpdateTemplate(int? id, [FromBody] List<ControlDTO> itemsToUpdate)
         {
             int fieldNo = 0;
             int? templateId = id;
-            if (id == null)
+            if (templateId == null)
             {
                 var template = new Template();
                 template.name = "name";
-                await _formDBContext.Templates.AddAsync(template);
-                _formDBContext.SaveChanges();
+                await _context.Templates.AddAsync(template);
+                _context.SaveChanges();
                 templateId = template.Id;
                 foreach (var item in itemsToUpdate)
                 {
-                    var update = new Control();
+                    var update = _mapper.Map<Control>(item);
                     update.templateId = template.Id;
                     update.fieldNo = ++fieldNo;
-                    update.taskData = item.taskData;
-                    await _formDBContext.Controls.AddAsync(update);
+                    await _context.Controls.AddAsync(update);
                 }
-                _formDBContext.SaveChanges();
+                _context.SaveChanges();
             }
             else
             {
-                var itemsInDb = await _formDBContext.Controls.Where(i => i.templateId == id).ToListAsync();
-
-                if (itemsInDb == null)
+                if (!TemplateExists((int)templateId))
                 {
                     return NotFound();
                 }
 
-                var itemsToDelete = await _formDBContext.Controls.Where(i => i.templateId == id).ToListAsync();
-                _formDBContext.Controls.RemoveRange(itemsToDelete);
+                var itemsToDelete = await _context.Controls.Where(i => i.templateId == templateId).ToListAsync();
+                _context.Controls.RemoveRange(itemsToDelete);
 
                 foreach (var item in itemsToUpdate)
                 {
-                    var update = new Control();
-                    update.templateId = (int)id;
+                    var update = _mapper.Map<Control>(item);
+                    update.templateId = (int)templateId;
                     update.fieldNo = ++fieldNo;
-                    update.taskData = item.taskData;
-                    await _formDBContext.Controls.AddAsync(update);
+                    await _context.Controls.AddAsync(update);
                 }
-                _formDBContext.SaveChanges();
+                _context.SaveChanges();
             }
             return Ok(new { templateId });
+        }
+
+        private bool TemplateExists(int id)
+        {
+            return _context.Templates.Any(e => e.Id == id);
         }
     }
 }

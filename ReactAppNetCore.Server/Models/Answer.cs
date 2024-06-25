@@ -20,8 +20,8 @@ namespace ReactAppNetCore.Server.Models
         [Column("answer_data")]
         public JsonDocument answerData { get; set; }
 
-        [Column("defaul_flag")]
-        public Boolean defaulFlag { get; set; }
+        [Column("default_flag")]
+        public Boolean defaultFlag { get; set; }
 
         public virtual Template template { get; set; }
     }
