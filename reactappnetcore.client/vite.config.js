@@ -9,10 +9,6 @@ import { env } from 'process';
 
 import reactRefresh from '@vitejs/plugin-react-refresh';
 import {nodePolyfills} from 'vite-plugin-node-polyfills';
-import commonjs from '@rollup/plugin-commonjs';
-import svgr from 'vite-plugin-svgr';
-import { nodeResolve } from '@rollup/plugin-node-resolve';
-import requireTransform from 'vite-plugin-require-transform';
 
 const baseFolder =
     env.APPDATA !== undefined && env.APPDATA !== ''
@@ -41,59 +37,57 @@ const target = env.ASPNETCORE_HTTPS_PORT ? `https://localhost:${env.ASPNETCORE_H
     env.ASPNETCORE_URLS ? env.ASPNETCORE_URLS.split(';')[0] : 'https://localhost:7298';
 
 // https://vitejs.dev/config/
-export default defineConfig({
-    plugins: [
-        plugin(), 
-        reactRefresh(), 
-        nodePolyfills(),
-        commonjs({
-            include: /node_modules/,
-            transformMixedEsModules: true
-          }),
-        nodeResolve({
-            browser: true,
-            preferBuiltins: false,
-        }),
-        svgr(),
-        requireTransform({
-            fileRegex: /.js$|.jsx$|.ts$|.tsx$/
-          })
-    ],
-    resolve: {
-        alias: {
-            '@': fileURLToPath(new URL('./src', import.meta.url)),
-        }
-    },
-    optimizeDeps: {
-        include: [
-            'react',
-            'react-dom',
-            'react-router-dom',
-            'react-redux',
-            'react-is',
-            'vite-plugin-node-polyfills/shims/buffer',
-            'vite-plugin-node-polyfills/shims/global',
-            'vite-plugin-node-polyfills/shims/process',
+export default defineConfig((mode) => {
+    env.NODE_ENV = mode === 'development' ? 'development' : 'production';
+
+    const envWithProcessPrefix = {
+        global: 'globalThis',
+        'process.env': `${JSON.stringify(env)}`,
+    };
+    return {
+        base: '/',
+        plugins: [
+            plugin(), 
+            reactRefresh(), 
+            nodePolyfills(),
         ],
-        esbuildOptions: {
-            // Node.js global to browser globalThis
-            define: {
-                global: 'globalThis',
-                process: 'process',
-            },
-        },
-    },
-    server: {
-        proxy: {
-            '^/weatherforecast': {
-                target,
-                secure: false
+        resolve: {
+            alias: {
+                '@': fileURLToPath(new URL('./src', import.meta.url)),
+                '~pe7-icon': path.resolve(__dirname, 'node_modules/pe7-icon'),
             }
         },
-        port: 5173,
-        https: {
-            key: fs.readFileSync(keyFilePath),
-            cert: fs.readFileSync(certFilePath),
+        build: {
+            commonjsOptions: { transformMixedEsModules: true } // Change
+        },
+        optimizeDeps: {
+            include: [
+                'react',
+                'react-dom',
+                'react-router-dom',
+                'react-redux',
+                'react-is',
+                'vite-plugin-node-polyfills/shims/buffer',
+                'vite-plugin-node-polyfills/shims/global',
+                'vite-plugin-node-polyfills/shims/process',
+            ],
+            esbuildOptions: {
+                // Node.js global to browser globalThis
+                define: envWithProcessPrefix,
+            },
+        },
+        server: {
+            proxy: {
+                '^/weatherforecast': {
+                    target,
+                    secure: false
+                }
+            },
+            port: 5173,
+            https: {
+                key: fs.readFileSync(keyFilePath),
+                cert: fs.readFileSync(certFilePath),
+            }
         }
     }
 })
