@@ -36,7 +36,9 @@ import AppFooter from "../../Layout/AppFooter/";
 // Theme Options
 
 import ThemeOptions from "../../Layout/ThemeOptions/";
-import FormBuilderPage from "../../FormBuilderComponent/pages/form-builder-page";
+import TemplateList from "./Components/TemplateList";
+import CreateOrUpdateTemplate from "./Components/CreateOrUpdateTemplate";
+import CreateAnswerForm from "./Components/CreateAnswer/CreateAnswerForm";
 
 const Forms = ({ match }) => (
   <Fragment>
@@ -46,8 +48,14 @@ const Forms = ({ match }) => (
       <AppSidebar />
       <div className="app-main__outer">
         <div className="app-main__inner">
+
           {/* Add FormBuilder 2 */}
-          <Route path={`${match.url}/form-builder`} component={FormBuilderPage}/>
+
+          <Route exact path={`${match.url}/form-builder`} component={CreateOrUpdateTemplate}/>
+          <Route exact path={`${match.url}/form-builder/:Id`} component={CreateOrUpdateTemplate}/>
+          <Route exact path={`${match.url}/template-list`} component={TemplateList}/>
+          <Route exact path={`${match.url}/create-answer-form/:Id`} component={CreateAnswerForm}/>
+
           {/* Form Elements */}
 
           <Route path={`${match.url}/controls`} component={FormElementsControls}/>

@@ -1,7 +1,7 @@
 import React from 'react';
 
 // Add our stylesheets for the demo.
-import "../../scss/application.scss";
+import "../assets/form-builder/application.scss";
 import { Navigate, Route, Routes } from 'react-router';
 import HomePage from './pages/home-page';
 import FormBuilderPage from './pages/form-builder-page';

@@ -109,9 +109,14 @@ export const FormsNav = [
         to: '#/forms/validation',
     },
     {
-        icon: 'pe-7s-note2',
-        label: 'Form Builder',
+        icon: 'pe-7s-news-paper',
+        label: 'Create Template',
         to: '#/forms/form-builder',
+    },
+    {
+        icon: 'pe-7s-note2',
+        label: 'Template List',
+        to: '#/forms/template-list',
     },
 ];
 export const WidgetsNav = [

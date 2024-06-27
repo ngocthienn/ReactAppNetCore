@@ -10,18 +10,29 @@ import PerfectScrollbar from "react-perfect-scrollbar";
 import HeaderLogo from "../AppLogo";
 
 import { setEnableMobileMenu } from "../../reducers/ThemeOptions";
-
+import store from "../../FormBuilderComponent/stores/store";
 class AppSidebar extends Component {
   state = {
     items: [
       { id: 1, text: 'Buy eggs' },
-    ]
+    ],
+    editElementMode : false,
   };
 
   toggleMobileSidebar = () => {
     let { enableMobileMenu, setEnableMobileMenu } = this.props;
     setEnableMobileMenu(!enableMobileMenu);
   };
+
+  componentDidMount() {
+    store.subscribe(state => this._onUpdateEditElementMode(state.editElementMode));
+  }
+
+  _onUpdateEditElementMode(editElementMode) {
+    this.setState({
+      editElementMode,
+    });
+  }
 
   render() {
     let {
@@ -31,7 +42,8 @@ class AppSidebar extends Component {
       backgroundImage,
       backgroundImageOpacity,
     } = this.props;
-
+    
+    if(this.state.editElementMode) return null;
     return (
       <Fragment>
         <div className="sidebar-mobile-overlay" onClick={this.toggleMobileSidebar}/>

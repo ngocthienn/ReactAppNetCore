@@ -57,11 +57,11 @@ namespace ReactAppNetCore.Server.Controllers
         }
 
         // GET: api/Answers/GetAnswerNotDefault/5
-        [HttpGet("[action]/{id}")]
+        [HttpGet("[action]/{templateId}")]
         public async Task<ActionResult<AnswerDTO>> GetAnswerNotDefault(int templateId)
         {
             var answer = await _context.Answers
-                                              .FirstOrDefaultAsync(c => c.Id == templateId && c.defaultFlag == false);
+                                              .FirstOrDefaultAsync(c => c.templateId == templateId && c.defaultFlag == false);
             return Ok(_mapper.Map<AnswerDTO>(answer));
         }
 

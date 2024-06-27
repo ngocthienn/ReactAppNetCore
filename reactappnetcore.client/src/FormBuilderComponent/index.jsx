@@ -32,6 +32,7 @@ class ReactFormBuilder extends React.Component {
     } else {
       this.setState({ editMode: !this.state.editMode, editElement: data });
     }
+    store.dispatch('setEditElementMode', !this.state.editMode);
   }
 
   manualEditModeOff() {
@@ -40,6 +41,7 @@ class ReactFormBuilder extends React.Component {
         editMode: false,
         editElement: null,
       });
+      store.dispatch('setEditElementMode', false);
     }
   }
 

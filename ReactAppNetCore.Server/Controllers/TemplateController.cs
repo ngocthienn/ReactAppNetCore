@@ -33,6 +33,22 @@ namespace ReactAppNetCore.Server.Controllers
             return _mapper.Map<List<TemplateDTO>>(res);
         }
 
+        // GET: api/Templates/Search
+        [HttpGet("Search")]
+        public async Task<ActionResult<IEnumerable<TemplateDTO>>> Search(string? keyword)
+        {
+            if (string.IsNullOrWhiteSpace(keyword))
+            {
+                var res = await _context.Templates.ToListAsync();
+                return Ok(_mapper.Map<List<TemplateDTO>>(res));
+            }
+            var results = await _context.Templates
+                .Where(e => EF.Functions.Like(e.name.ToLower(), $"%{keyword.ToLower()}%"))
+                .ToListAsync();
+
+            return Ok(_mapper.Map<List<TemplateDTO>>(results));
+        }
+
         // GET: api/Templates/5
         [HttpGet("{id}")]
         public async Task<ActionResult<TemplateDTO>> GetTemplate(int id)
@@ -109,18 +125,18 @@ namespace ReactAppNetCore.Server.Controllers
         }
 
         [HttpPost("[action]/{id?}")]
-        public async Task<ActionResult> AddOrUpdateTemplate(int? id, [FromBody] List<ControlDTO> itemsToUpdate)
+        public async Task<ActionResult> AddOrUpdateTemplate(int? id, [FromBody] UpdateTemplateDTO updateTemplateDTO)
         {
             int fieldNo = 0;
             int? templateId = id;
             if (templateId == null)
             {
                 var template = new Template();
-                template.name = "name";
+                template.name = updateTemplateDTO.templateUpdate.name;
                 await _context.Templates.AddAsync(template);
                 _context.SaveChanges();
                 templateId = template.Id;
-                foreach (var item in itemsToUpdate)
+                foreach (var item in updateTemplateDTO.controlUpdates)
                 {
                     var update = _mapper.Map<Control>(item);
                     update.templateId = template.Id;
@@ -136,10 +152,16 @@ namespace ReactAppNetCore.Server.Controllers
                     return NotFound();
                 }
 
+                // Update Template
+                var template = await _context.Templates.FindAsync((int)templateId);
+                template.name = updateTemplateDTO.templateUpdate.name;
+                _context.Entry(template).State = EntityState.Modified;
+                await _context.SaveChangesAsync();
+
                 var itemsToDelete = await _context.Controls.Where(i => i.templateId == templateId).ToListAsync();
                 _context.Controls.RemoveRange(itemsToDelete);
 
-                foreach (var item in itemsToUpdate)
+                foreach (var item in updateTemplateDTO.controlUpdates)
                 {
                     var update = _mapper.Map<Control>(item);
                     update.templateId = (int)templateId;

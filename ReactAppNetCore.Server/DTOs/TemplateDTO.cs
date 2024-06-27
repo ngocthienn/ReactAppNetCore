@@ -7,7 +7,7 @@ namespace ReactAppNetCore.Server.DTOs
 {
     public class TemplateDTO
     {
-        public int Id { get; set; }
+        public int? Id { get; set; }
         public string name { get; set; }
     }
 }

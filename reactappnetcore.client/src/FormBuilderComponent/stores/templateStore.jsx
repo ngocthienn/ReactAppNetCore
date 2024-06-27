@@ -9,6 +9,11 @@ const templateStore = new Store({
             get(`${apiUrl}/Templates`).then(res => {
                 context.commit('setData', res.data);
             })        
+        },
+        searchAllTemplate(context, keyword) {
+            get(`${apiUrl}/Templates/Search?keyword=${keyword}`).then(res => {
+                context.commit('setData', res.data);
+            })        
         }
     },
 

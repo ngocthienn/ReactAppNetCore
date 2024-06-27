@@ -15,29 +15,6 @@ const store = new Store({
       if (saveData) this.save(data);
     },
 
-    // load(context, { loadUrl, saveUrl, data, saveAlways }) {
-    //   _saveUrl = saveUrl;
-    //   const saveA = saveAlways || saveAlways === undefined;
-    //   context.commit('setSaveAlways', saveA);
-    //   if (_onLoad) {
-    //     _onLoad().then(x => {
-    //       if (data && data.length > 0 && x.length === 0) {
-    //         data.forEach(y => x.push(y));
-    //       }
-    //       this.setData(context, x);
-    //     });
-    //   } else if (loadUrl) {
-    //     // get(loadUrl).then(x => {
-    //     //   if (data && data.length > 0 && x.length === 0) {
-    //     //     data.forEach(y => x.push(y));
-    //     //   }
-    //     //   this.setData(context, x);
-    //     // });
-    //   } else {
-    //     this.setData(context, data);
-    //   }
-    // },
-
     // click thì sẽ tạo item ở toolbar
     create(context, element) {
       const { data, saveAlways } = context.state;
@@ -107,6 +84,12 @@ const store = new Store({
       templateId = parseInt(templateId);
       if (isNaN(templateId)) {
         context.commit('setData', []);
+        context.commit('setSaveControlStatus', false);
+        const templateCurrent = {
+          Id : null,
+          name : ''
+        };
+        context.commit('setTemplateCurrent', templateCurrent);
       } else {
         get(`${apiUrl}/Controls/GetControlsWithTemplateId/${templateId}`).then(res => {
           res.data = res.data.map(itemX => {
@@ -116,8 +99,12 @@ const store = new Store({
               taskData: undefined
             };
           });
-          context.commit('setData', res.data);
-          context.commit('setSaveControlStatus', true);
+          get(`${apiUrl}/Templates/${templateId}`).then(resTemplate => {
+            context.commit('setData', res.data);
+            context.commit('setSaveControlStatus', true);
+            context.commit('setTemplateCurrent', resTemplate.data);
+          });
+          
         })
       }
     },
@@ -133,8 +120,8 @@ const store = new Store({
       }
     },
 
-    saveControlsTemplate(context, { templateId, taskData }) {
-      let newData = taskData.map(item => {
+    saveControlsTemplate(context, { templateId, taskData, templateName }) {
+      let controlUpdates = taskData.map(item => {
         return {
           templateId: item.templateId,
           fieldNo: item.fieldNo,
@@ -144,10 +131,23 @@ const store = new Store({
           }
         };
       });
+
+      let templateUpdate = {
+        id : null,
+        name : templateName
+      };
+
+      let newData = {
+        controlUpdates,
+        templateUpdate
+      };
+
       post(`${apiUrl}/Templates/AddOrUpdateTemplate/${templateId}`, newData).then(res => {
         context.commit('setTemplateId', res.data.templateId);
         context.commit('setSaveControlStatus', true);
         context.commit('setData', taskData);
+        templateUpdate.id = templateId;
+        context.commit('setTemplateCurrent', templateUpdate);
         if(parseInt(res.data.templateId) !== templateId) {
           context.commit('setNavTemplateId', res.data.templateId);
         }
@@ -169,6 +169,14 @@ const store = new Store({
         console.log(err);
         alert("Save failed")
       })
+    },
+
+    setEditElementMode(context, editElementMode) {
+      context.commit('setEditElementMode', editElementMode);
+    },
+
+    setTemplateCurrent(context, templateCurrent) {
+      context.commit('setTemplateCurrent', templateCurrent);
     }
   },
 
@@ -206,6 +214,14 @@ const store = new Store({
       state.navTemplateId = payload;
       return state;
     },
+    setEditElementMode(state, payload) {
+      state.editElementMode = payload;
+      return state;
+    },
+    setTemplateCurrent(state, payload) {
+      state.templateCurrent = payload;
+      return state;
+    },
   },
 
   initialState: {
@@ -214,9 +230,14 @@ const store = new Store({
     lastItem: null,
     answer: [],
     templateId: '',
+    templateCurrent : {
+      id : null,
+      name : ''
+    },
     navTemplateId : null,
     errorMessage: '',
     saveControlStatus: true,
+    editElementMode : false,
   },
 });
 
