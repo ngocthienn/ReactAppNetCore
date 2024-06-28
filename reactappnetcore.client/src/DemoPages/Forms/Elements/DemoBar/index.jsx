@@ -70,14 +70,6 @@ const DemoBar = (props) => {
             alert("Form has not been saved");
             return;
         }
-        for (let element of data) {
-            if(typeof element.custom_name !== 'undefined' && element.custom_name.toLowerCase().includes("multiselect") && typeof element.value !== 'undefined') {
-                try {
-                    let jsonObject = JSON.parse(element.value);
-                    element.value = jsonObject;
-                } catch {}
-            }
-        }
         // console.log(data);
         store.dispatch('saveAnswersTemplate', {
             templateId : templateId,

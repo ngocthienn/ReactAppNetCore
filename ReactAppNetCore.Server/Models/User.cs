@@ -17,5 +17,8 @@ namespace ReactAppNetCore.Server.Models
 
         [ColumnAttribute("name")]
         public string name { get; set; }
+
+        [ColumnAttribute("password")]
+        public string password { get; set; }
     }
 }

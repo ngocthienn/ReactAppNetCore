@@ -28,13 +28,23 @@ import 'react-toastify/dist/ReactToastify.css';
 
 import city3 from "../../../assets/utils/images/dropdown-header/city3.jpg";
 import avatar1 from "../../../assets/utils/images/avatars/1.jpg";
+import { connect } from "react-redux";
 
 class UserBox extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       active: false,
+      userLogin : props.userLogin
     };
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    if (this.props.userLogin !== prevProps.userLogin) {
+      this.setState({
+        userLogin,
+      })
+    }
   }
 
   notify2 = () =>
@@ -173,7 +183,8 @@ class UserBox extends React.Component {
                 </UncontrolledButtonDropdown>
               </div>
               <div className="widget-content-left  ms-3 header-user-info">
-                <div className="widget-heading">Alina Mclourd</div>
+                {/* <div className="widget-heading">{ this.state.userLogin || 'Alina Mclourd' }</div> */}
+                <div className="widget-heading">{ this.state.userLogin?.username || 'No User' }</div>
                 <div className="widget-subheading">VP People Manager</div>
               </div>
               <div className="widget-content-right header-user-info ms-3">
@@ -192,4 +203,11 @@ class UserBox extends React.Component {
   }
 }
 
-export default UserBox;
+// export default UserBox;
+const mapStateToProps = (state) => ({
+  userLogin : state.UserCurrent.userLogin,
+});
+
+const mapDispatchToProps = (dispatch) => ({});
+
+export default connect(mapStateToProps, mapDispatchToProps)(UserBox);

@@ -9,7 +9,7 @@ namespace ReactAppNetCore.Server.DTOs
 
         public int? templateId { get; set; }
 
-        public string? username { get; set; }
+        public string username { get; set; }
 
         public JsonDocument answerData { get; set; }
 

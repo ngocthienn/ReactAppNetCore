@@ -4,10 +4,109 @@ import Slider from "react-slick";
 
 import bg3 from "../../../assets/utils/images/originals/citynights.jpg";
 
-import { Col, Row, Button, Form, FormGroup, Label, Input } from "reactstrap";
+import { Col, Row, Button, Form, FormGroup, Label, Input, FormFeedback } from "reactstrap";
+import { connect } from "react-redux";
 
-export default class Register extends Component {
+import { registerApp, RegisterStatus, changeRegistrationStatus } from "../../../reducers/UserCurrent";
+
+class Register extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      formData: {
+        username: '',
+        name: '',
+        password: '',
+        passwordrep: '',
+      },
+      errors: {
+        username: '',
+        name: '',
+        password: '',
+        passwordrep: '',
+      },
+    };
+  }
+
+  handleChange = (e) => {
+    const { name, value } = e.target;
+    this.setState({
+      formData: {
+        ...this.state.formData,
+        [name]: value,
+      },
+    });
+  };
+
+  handleSubmit = (e) => {
+    e.preventDefault();
+    let errors = this.validate();
+    this.setState({ errors });
+
+    if (Object.keys(errors).length === 0) {
+      const { passwordrep, ...data } = this.state.formData;
+      let { registerApp } = this.props;
+      registerApp(data);
+    }
+  };
+
+  validate = () => {
+    const { formData } = this.state;
+    let errors = {};
+
+    if (formData.username === '') {
+      errors.username = 'Username is required';
+    } else if (!/^[a-zA-Z0-9]+$/.test(formData.username)) {
+      errors.username = 'Username can only contain letters and numbers';
+    }
+
+    if (formData.name === '') {
+      errors.name = 'Name is required';
+    }
+
+    if (formData.password === '') {
+      errors.password = 'Password is required';
+    } else if (!/^[a-zA-Z0-9]+$/.test(formData.password)) {
+      errors.password = 'Password can only contain letters and numbers';
+    } else if (formData.password.length < 8) {
+      errors.password = 'Password must be at least 8 characters';
+    }
+
+    if (formData.passwordrep === '') {
+      errors.passwordrep = 'Repeat Password is required';
+    } else if (formData.password !== formData.passwordrep) {
+      errors.passwordrep = 'Passwords must match';
+    }
+    
+    return errors;
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    if (this.props.registerStatus !== prevProps.registerStatus) {
+      let { changeRegistrationStatus } = this.props;
+      switch (this.props.registerStatus) {
+        case RegisterStatus.REGISTRATION_SUCCESSFUL: {
+          alert("Save success");
+          changeRegistrationStatus(RegisterStatus.NOT_REGISTERED);
+          this.props.history.push('/pages/login');
+          break;
+        }
+
+        case RegisterStatus.REGISTRATION_FAILED: {
+          alert("Save fail");
+          changeRegistrationStatus(RegisterStatus.NOT_REGISTERED);
+          break;
+        }
+
+        default:
+          break;
+      }
+    }
+  }
+
   render() {
+    const { formData, errors } = this.state;
+
     let settings = {
       dots: true,
       infinite: true,
@@ -36,20 +135,28 @@ export default class Register extends Component {
                   </span>
                 </h4>
                 <div>
-                  <Form>
+                  <Form onSubmit={this.handleSubmit}>
                     <Row>
                       <Col md={6}>
-                        <FormGroup>
+                        {/* <FormGroup>
                           <Label for="exampleEmail">
                             <span className="text-danger">*</span> Email
                           </Label>
                           <Input type="email" name="email" id="exampleEmail" placeholder="Email here..."/>
+                        </FormGroup> */}
+                        <FormGroup>
+                          <Label for="exampleUsername">
+                            <span className="text-danger">*</span> Username
+                          </Label>
+                          <Input onChange={this.handleChange} value={formData.username} invalid={errors.username !== ''} type="text" name="username" id="exampleUsername" placeholder="Username here..."/>
+                          <FormFeedback>{errors.username}</FormFeedback>
                         </FormGroup>
                       </Col>
                       <Col md={6}>
                         <FormGroup>
                           <Label for="exampleName">Name</Label>
-                          <Input type="text" name="text" id="exampleName" placeholder="Name here..."/>
+                          <Input onChange={this.handleChange} value={formData.name} invalid={errors.name !== ''} type="text" name="name" id="exampleName" placeholder="Name here..."/>
+                          <FormFeedback>{errors.name}</FormFeedback>
                         </FormGroup>
                       </Col>
                       <Col md={6}>
@@ -57,7 +164,8 @@ export default class Register extends Component {
                           <Label for="examplePassword">
                             <span className="text-danger">*</span> Password
                           </Label>
-                          <Input type="password" name="password" id="examplePassword" placeholder="Password here..."/>
+                          <Input onChange={this.handleChange} value={formData.password} invalid={errors.password !== ''} type="password" name="password" id="examplePassword" placeholder="Password here..."/>
+                          <FormFeedback>{errors.password}</FormFeedback>
                         </FormGroup>
                       </Col>
                       <Col md={6}>
@@ -66,7 +174,8 @@ export default class Register extends Component {
                             <span className="text-danger">*</span> Repeat
                             Password
                           </Label>
-                          <Input type="password" name="passwordrep" id="examplePasswordRep" placeholder="Repeat Password here..."/>
+                          <Input onChange={this.handleChange} value={formData.passwordrep} invalid={errors.passwordrep !== ''} type="password" name="passwordrep" id="examplePasswordRep" placeholder="Repeat Password here..."/>
+                          <FormFeedback>{errors.passwordrep}</FormFeedback>
                         </FormGroup>
                       </Col>
                     </Row>
@@ -88,7 +197,7 @@ export default class Register extends Component {
                         </a>
                       </h5>
                       <div className="ms-auto">
-                        <Button color="primary" className="btn-wide btn-pill btn-shadow btn-hover-shine" size="lg">
+                        <Button type="submit" color="primary" className="btn-wide btn-pill btn-shadow btn-hover-shine" size="lg">
                           Create Account
                         </Button>
                       </div>
@@ -123,3 +232,14 @@ export default class Register extends Component {
     );
   }
 }
+
+const mapStateToProps = (state) => ({
+  registerStatus : state.UserCurrent.registerStatus,
+});
+
+const mapDispatchToProps = (dispatch) => ({
+  registerApp : (registerData) => dispatch(registerApp(registerData)),
+  changeRegistrationStatus : (registerStatus) => dispatch(changeRegistrationStatus(registerStatus)),
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(Register);

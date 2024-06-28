@@ -118,6 +118,11 @@ export const FormsNav = [
         label: 'Template List',
         to: '#/forms/template-list',
     },
+    {
+        icon: 'pe-7s-note',
+        label: 'Answer List',
+        to: '#/forms/answer-list',
+    },
 ];
 export const WidgetsNav = [
     {

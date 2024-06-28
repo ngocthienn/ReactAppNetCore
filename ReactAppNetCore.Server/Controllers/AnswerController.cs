@@ -33,6 +33,14 @@ namespace ReactAppNetCore.Server.Controllers
             return _mapper.Map<List<AnswerDTO>>(res);
         }
 
+        // GET: api/Answers
+        [HttpGet("[action]/{username}")]
+        public async Task<ActionResult<IEnumerable<AnswerDTO>>> GetAnswersWithUsername(string username)
+        {
+            var res = await _context.Answers.Where(u => u.username == username).ToListAsync();
+            return _mapper.Map<List<AnswerDTO>>(res);
+        }
+
         // GET: api/Answers/5
         [HttpGet("{id}")]
         public async Task<ActionResult<AnswerDTO>> GetAnswer(int id)
@@ -153,7 +161,6 @@ namespace ReactAppNetCore.Server.Controllers
         {
             var answer = _mapper.Map<Answer>(answerUpdate);
             answer.templateId = id;
-            answer.username = "username";
             answer.defaultFlag = false;
             answer.answerData = answerUpdate.answerData;
             _context.Answers.Update(answer);

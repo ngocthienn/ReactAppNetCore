@@ -39,6 +39,7 @@ import ThemeOptions from "../../Layout/ThemeOptions/";
 import TemplateList from "./Components/TemplateList";
 import CreateOrUpdateTemplate from "./Components/CreateOrUpdateTemplate";
 import CreateAnswerForm from "./Components/CreateAnswer/CreateAnswerForm";
+import AnswerList from "./Components/AnswerList";
 
 const Forms = ({ match }) => (
   <Fragment>
@@ -55,6 +56,7 @@ const Forms = ({ match }) => (
           <Route exact path={`${match.url}/form-builder/:Id`} component={CreateOrUpdateTemplate}/>
           <Route exact path={`${match.url}/template-list`} component={TemplateList}/>
           <Route exact path={`${match.url}/create-answer-form/:Id`} component={CreateAnswerForm}/>
+          <Route exact path={`${match.url}/answer-list`} component={AnswerList}/>
 
           {/* Form Elements */}
 

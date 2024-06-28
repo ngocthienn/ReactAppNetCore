@@ -16,7 +16,8 @@ namespace ReactAppNetCore.Server.Helpers
             CreateMap<Template, TemplateDTO>().ReverseMap();
             CreateMap<Answer, AnswerDTO>().ReverseMap();
             CreateMap<Control, ControlDTO>().ReverseMap();
-            CreateMap<User, UserDTO>().ReverseMap();
+            CreateMap<User, UserDTO>().ForMember(dest => dest.password, opt => opt.Ignore());
+            CreateMap<UserDTO, User>();
         }
     }
 }

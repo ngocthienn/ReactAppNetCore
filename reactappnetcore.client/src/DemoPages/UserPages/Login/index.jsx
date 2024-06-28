@@ -6,10 +6,93 @@ import bg1 from "../../../assets/utils/images/originals/city.jpg";
 import bg2 from "../../../assets/utils/images/originals/citydark.jpg";
 import bg3 from "../../../assets/utils/images/originals/citynights.jpg";
 
-import { Col, Row, Button, Form, FormGroup, Label, Input } from "reactstrap";
+import { Col, Row, Button, Form, FormGroup, Label, Input, FormFeedback } from "reactstrap";
+import { changeLoginStatus, loginApp, LoginStatus } from "../../../reducers/UserCurrent";
+import { connect } from "react-redux";
 
-export default class Login extends Component {
+class Login extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      formData: {
+        username: '',
+        password: '',
+      },
+      errors: {
+        username: '',
+        password: '',
+      },
+    };
+  }
+
+  handleChange = (e) => {
+    const { name, value } = e.target;
+    this.setState({
+      formData: {
+        ...this.state.formData,
+        [name]: value,
+      },
+    });
+  };
+
+  handleSubmit = (e) => {
+    e.preventDefault();
+    let errors = this.validate();
+    this.setState({ errors });
+
+    if (Object.keys(errors).length === 0) {
+      let { loginApp } = this.props;
+      loginApp(this.state.formData);
+    }
+  };
+
+  validate = () => {
+    const { formData } = this.state;
+    let errors = {};
+
+    if (formData.username === '') {
+      errors.username = 'Username is required';
+    } else if (!/^[a-zA-Z0-9]+$/.test(formData.username)) {
+      errors.username = 'Username can only contain letters and numbers';
+    }
+
+    if (formData.password === '') {
+      errors.password = 'Password is required';
+    } else if (!/^[a-zA-Z0-9]+$/.test(formData.password)) {
+      errors.password = 'Password can only contain letters and numbers';
+    } else if (formData.password.length < 8) {
+      errors.password = 'Password must be at least 8 characters';
+    }
+    
+    return errors;
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    if (this.props.loginStatus !== prevProps.loginStatus) {
+      let { changeLoginStatus } = this.props;
+      switch (this.props.loginStatus) {
+        case LoginStatus.LOGIN_SUCCESSFUL: {
+          alert("Login success");
+          changeLoginStatus(LoginStatus.NOT_LOGGED_IN);
+          this.props.history.push('/dashboards/crm');
+          break;
+        }
+
+        case LoginStatus.LOGIN_FAILED: {
+          alert("Login fail");
+          changeLoginStatus(LoginStatus.NOT_LOGGED_IN);
+          break;
+        }
+
+        default:
+          break;
+      }
+    }
+  }
+
   render() {
+    const { formData, errors } = this.state;
+
     let settings = {
       dots: true,
       infinite: true,
@@ -88,18 +171,24 @@ export default class Login extends Component {
                 </h6>
                 <Row className="divider" />
                 <div>
-                  <Form>
+                  <Form onSubmit={this.handleSubmit}>
                     <Row>
                       <Col md={6}>
-                        <FormGroup>
+                        {/* <FormGroup>
                           <Label for="exampleEmail">Email</Label>
                           <Input type="email" name="email" id="exampleEmail" placeholder="Email here..."/>
+                        </FormGroup> */}
+                        <FormGroup>
+                          <Label for="exampleUsername">Username</Label>
+                          <Input onChange={this.handleChange} value={formData.username} invalid={errors.username !== ''} type="text" name="username" id="exampleUsername" placeholder="Username here..."/>
+                          <FormFeedback>{errors.username}</FormFeedback>
                         </FormGroup>
                       </Col>
                       <Col md={6}>
                         <FormGroup>
                           <Label for="examplePassword">Password</Label>
-                          <Input type="password" name="password" id="examplePassword" placeholder="Password here..."/>
+                          <Input onChange={this.handleChange} value={formData.password} invalid={errors.password !== ''} type="password" name="password" id="examplePassword" placeholder="Password here..."/>
+                          <FormFeedback>{errors.password}</FormFeedback>
                         </FormGroup>
                       </Col>
                     </Row>
@@ -115,7 +204,7 @@ export default class Login extends Component {
                         <a href="https://colorlib.com/" onClick={(e) => e.preventDefault()} className="btn-lg btn btn-link" >
                           Recover Password
                         </a>{" "}
-                        <Button color="primary" size="lg">
+                        <Button type="submit" color="primary" size="lg">
                           Login to Dashboard
                         </Button>
                       </div>
@@ -130,3 +219,14 @@ export default class Login extends Component {
     );
   }
 }
+
+const mapStateToProps = (state) => ({
+  loginStatus : state.UserCurrent.loginStatus,
+});
+
+const mapDispatchToProps = (dispatch) => ({
+  loginApp : (loginData) => dispatch(loginApp(loginData)),
+  changeLoginStatus : (loginStatus) => dispatch(changeLoginStatus(loginStatus)),
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(Login);

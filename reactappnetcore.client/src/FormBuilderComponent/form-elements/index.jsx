@@ -404,7 +404,7 @@ class MultiSelect extends React.Component {
             labelledBy="Select"
             overrideStrings={this.props.data.overrideStrings}
           />
-          <input {...props} type='text' value={this.state.stringSelected} onChange={this.handleSelectChange} style={{ display: 'none' }} readOnly/>
+          {/* <input {...props} type='text' value={this.state.stringSelected} onChange={this.handleSelectChange} style={{ display: 'none' }} readOnly/> */}
         </div>
       </div>
     );

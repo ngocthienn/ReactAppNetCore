@@ -79,18 +79,16 @@ class ReactForm extends React.Component {
     if (item.element === 'Rating') {
       $item.value = ref.inputField.current.state.rating;
     } else if (item.element === 'Tags') {
-      $item.value = ref.inputField.current.state.value;
+      // $item.value = ref.inputField.current.state.value;
+      $item.value = ref.inputField.current.state.selectValue;
     } else if (item.element === 'DatePicker') {
       $item.value = ref.state.value;
     } else if (item.element === 'Camera') {
       $item.value = ref.state.img;
     } else if (item.element === 'FileUpload') {
       $item.value = ref.state.fileUpload;
-    } if (item.element === 'MultiSelect') {
-      $item = ReactDOM.findDOMNode(ref.inputField.current);
-      if ($item && typeof $item.value === 'string') {
-        $item.value = JSON.parse(JSON.stringify($item.value));
-      }
+    } else if (item.element === 'MultiSelect') {
+      $item.value = ref.state.selected;
     } else if (ref && ref.inputField && ref.inputField.current) {
       $item = ReactDOM.findDOMNode(ref.inputField.current);
       if ($item && typeof $item.value === 'string') {

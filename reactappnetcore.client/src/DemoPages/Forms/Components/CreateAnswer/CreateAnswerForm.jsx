@@ -3,6 +3,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { ReactFormGenerator } from '../../../../FormBuilderComponent';
 import * as variables from "../../../../../variables";
 import { nanoid } from 'nanoid';
+import { useSelector } from 'react-redux';
 
 const headers = {
     Accept: 'application/json',
@@ -17,6 +18,7 @@ const language = locale ? locale : 'en';
 const CreateAnswerForm = ({ match }) => {
     const [data, setData] = useState([]);
     const [answerData, setAnswerData] = useState();
+    const userLogin = useSelector(state => state.UserCurrent.userLogin);
     
     useEffect(() => {
         const parts = (match.url !== null && match.url !== undefined) ? match.url.split('/') : "";
@@ -70,13 +72,14 @@ const CreateAnswerForm = ({ match }) => {
     const onSubmit = (data) => {
         const currentUrl = window.location.href;
         const lastSegment = currentUrl.substring(currentUrl.lastIndexOf('/') + 1);
-
+        
         if (!isNaN(lastSegment)) {
             fetch(`${apiUrl}/Answers/AddAnswerNotDefaultWithId/${lastSegment}`, {
                 method: 'POST',
                 headers,
                 body: JSON.stringify({
                     templateId: parseInt(lastSegment),
+                    username : userLogin.username,
                     answerData: data,
                 }),
             }).then(response => {
