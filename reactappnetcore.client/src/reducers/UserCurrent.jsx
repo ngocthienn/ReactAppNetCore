@@ -51,6 +51,7 @@ export const registerApp = registerData => (dispatch) => {
 
 export const loginApp = loginData => (dispatch) => {
     post(`${apiUrl}/Users/Login`, loginData).then(res => {
+        sessionStorage.setItem('userApp', JSON.stringify(res.data));
         dispatch({
             type: LOGIN_APP,
             payload: {
@@ -68,6 +69,28 @@ export const loginApp = loginData => (dispatch) => {
             }
         });
     })
+}
+
+export const loadUserApp = () => (dispatch) => {
+    var res = sessionStorage.getItem('userApp');
+    dispatch({
+        type: LOGIN_APP,
+        payload: {
+            loginStatus : LoginStatus.LOGIN_SUCCESSFUL,
+            userLogin : JSON.parse(res)
+        }
+    });
+}
+
+export const logoutUserApp = () => (dispatch) => {
+    sessionStorage.removeItem('userApp');
+    dispatch({
+        type: LOGIN_APP,
+        payload: {
+            loginStatus : LoginStatus.LOGIN_FAILED,
+            userLogin : null
+        }
+    });
 }
 
 export const changeLoginStatus = loginStatus => ({

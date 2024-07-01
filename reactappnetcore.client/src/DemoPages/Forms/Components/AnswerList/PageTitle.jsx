@@ -30,7 +30,7 @@ class PageTitle extends Component {
                   active: true,
                 })}>
               <div className="input-holder">
-                <input type="text" className="search-input" placeholder="Type a name to search" value={this.props.valueSearch} onChange={this.props.onChangeSearch} />
+                <input type="text" className="search-input" placeholder="Type ID or Template Id to search" value={this.props.valueSearch} onChange={this.props.onChangeSearch} />
                 <button 
                   className="search-icon">
                   <span/>

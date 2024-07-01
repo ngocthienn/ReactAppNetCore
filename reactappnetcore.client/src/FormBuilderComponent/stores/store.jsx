@@ -7,6 +7,22 @@ let _saveUrl;
 let _onPost;
 let _onLoad;
 
+function updateIdAndOptionsControl(data) {
+  if (!Array.isArray(data)) {
+    return;
+  }
+  data.forEach((item, indexControl) => {
+    const firstPart = item.field_name.substring(0, item.field_name.lastIndexOf('_'));
+    item.field_name = `${firstPart}_${indexControl + 1}`;
+    item.id = indexControl + 1;
+    if (Array.isArray(item.options)) {
+      item.options.forEach((option, indexOption) => {
+        option.key = `${item.field_name}_item_${(indexOption + 1)}`;
+      });
+    }
+  });
+}
+
 const store = new Store({
   actions: {
     setData(context, data, saveData) {
@@ -19,6 +35,7 @@ const store = new Store({
     create(context, element) {
       const { data, saveAlways } = context.state;
       data.push(element);
+      updateIdAndOptionsControl(data);
       this.setData(context, data, saveAlways);
     },
 
@@ -26,6 +43,7 @@ const store = new Store({
     delete(context, element) {
       const { data, saveAlways } = context.state;
       data.splice(data.indexOf(element), 1);
+      updateIdAndOptionsControl(data);
       this.setData(context, data, saveAlways);
     },
 
@@ -56,6 +74,7 @@ const store = new Store({
       const { saveAlways } = context.state;
       const newData = elements.filter(x => x && !x.parentId);
       elements.filter(x => x && x.parentId).forEach(x => newData.push(x));
+      updateIdAndOptionsControl(newData);
       this.setData(context, newData, saveAlways);
     },
 
@@ -158,10 +177,11 @@ const store = new Store({
       })
     },
 
-    saveAnswersTemplate(context, { templateId, answerData }) {
+    saveAnswersTemplate(context, { templateId, answerData, username }) {
       post(`${apiUrl}/Answers/UpdateAnswerDefaultWithTemplateId/${templateId}`, {
         templateId: templateId,
-        answerData: answerData
+        answerData: answerData,
+        username : username,
       }).then(res => {
           context.commit('setAnswer', answerData);
           alert("Save success");

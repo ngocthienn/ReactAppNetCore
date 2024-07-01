@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using ReactAppNetCore.Server.DTOs;
 using ReactAppNetCore.Server.Models;
 using ReactAppNetCore.Server.Repositories;
+using System.Text.Json;
 
 namespace ReactAppNetCore.Server.Controllers
 {
@@ -33,11 +34,29 @@ namespace ReactAppNetCore.Server.Controllers
             return _mapper.Map<List<AnswerDTO>>(res);
         }
 
+         // GET: api/Answers/Search
+        [HttpGet("Search")]
+        public async Task<ActionResult<IEnumerable<AnswerDTO>>> Search(string? keyword)
+        {
+            if (string.IsNullOrWhiteSpace(keyword))
+            {
+                var res = await _context.Answers.ToListAsync();
+                return Ok(_mapper.Map<List<AnswerDTO>>(res));
+            }
+            keyword = keyword.ToLower();
+            var results = await _context.Answers
+                .Where(e => EF.Functions.Like(e.Id.ToString(), $"%{keyword}%") ||
+                            EF.Functions.Like(e.templateId.ToString(), $"%{keyword}%"))
+                .ToListAsync();
+
+            return Ok(_mapper.Map<List<AnswerDTO>>(results));
+        }
+
         // GET: api/Answers
         [HttpGet("[action]/{username}")]
         public async Task<ActionResult<IEnumerable<AnswerDTO>>> GetAnswersWithUsername(string username)
         {
-            var res = await _context.Answers.Where(u => u.username == username).ToListAsync();
+            var res = await _context.Answers.Where(u => u.username == username && u.defaultFlag == false).ToListAsync();
             return _mapper.Map<List<AnswerDTO>>(res);
         }
 
@@ -143,7 +162,7 @@ namespace ReactAppNetCore.Server.Controllers
                 answer = new Answer();
                 answer.templateId = templateId;
                 answer.defaultFlag = true;
-                answer.username = "admin";
+                answer.username = answerUpdate.username;
                 answer.answerData = answerUpdate.answerData;
                 _context.Answers.Add(answer);
             }
@@ -156,16 +175,47 @@ namespace ReactAppNetCore.Server.Controllers
             return Ok();
         }
 
-        [HttpPost("[action]/{id}")]
-        public async Task<ActionResult> AddAnswerNotDefaultWithId(int id, [FromBody] AnswerDTO answerUpdate)
+        [HttpPost("[action]/{templateId}")]
+        public async Task<ActionResult> AddAnswerNotDefaultWithTemplateId(int templateId, [FromBody] AnswerDTO answerUpdate)
         {
             var answer = _mapper.Map<Answer>(answerUpdate);
-            answer.templateId = id;
+            answer.templateId = templateId;
             answer.defaultFlag = false;
             answer.answerData = answerUpdate.answerData;
             _context.Answers.Update(answer);
             _context.SaveChanges();
-            return Ok();
+            return Ok(_mapper.Map<AnswerDTO>(answer));
+        }
+
+        [HttpPost("[action]/{id}")]
+        public async Task<ActionResult> UpdateAnswerNotDefaultWithId(int id, [FromBody] AnswerDTO answerDTO)
+        {
+            var answer = _mapper.Map<Answer>(answerDTO);
+            answer.defaultFlag = false;
+            if (id != answer.Id)
+            {
+                return BadRequest();
+            }
+
+            _context.Entry(answer).State = EntityState.Modified;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!AnswerExists(id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            return Ok(_mapper.Map<AnswerDTO>(answer));
         }
 
         private bool AnswerExists(int id)

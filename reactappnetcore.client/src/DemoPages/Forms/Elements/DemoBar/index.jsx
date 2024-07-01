@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { ReactFormGenerator } from '../../../../FormBuilderComponent';
 import store from "../../../../FormBuilderComponent/stores/store";
+import { connect } from 'react-redux';
 
 const locale = import.meta.env.VITE_DEFAULT_LOCALE;
 const language = locale ? locale : 'en';
@@ -73,7 +74,8 @@ const DemoBar = (props) => {
         // console.log(data);
         store.dispatch('saveAnswersTemplate', {
             templateId : templateId,
-            answerData : data
+            answerData : data,
+            username : props.userLogin?.username
         })
         // if (FormBuilderReducer.saveControlStatus !== true) {
         //     alert("Form has not been saved");
@@ -196,4 +198,11 @@ const DemoBar = (props) => {
     );
 };
 
-export default DemoBar;
+const mapStateToProps = (state) => ({
+    userLogin : state.UserCurrent.userLogin,
+});
+  
+const mapDispatchToProps = (dispatch) => ({});
+
+export default connect(mapStateToProps, mapDispatchToProps)(DemoBar);
+// export default DemoBar;

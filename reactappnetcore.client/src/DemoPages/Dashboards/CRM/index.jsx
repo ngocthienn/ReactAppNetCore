@@ -10,14 +10,9 @@ import ScrollableInkTabBar from "rc-tabs/lib/ScrollableInkTabBar";
 // Examples
 import CRMDashboard1 from "./Examples/Variation1";
 import CRMDashboard2 from "./Examples/Variation2";
-import { connect } from "react-redux";
-import { Redirect } from "react-router-dom";
 
-class CRMDashboard extends Component {
+export default class CRMDashboard extends Component {
   render() {
-    if(this.props.userLogin == null || this.props.userLogin.username === '') {
-      return <Redirect to="/pages/login"/>
-    }
     return (
       <Fragment>
         <TransitionGroup>
@@ -44,11 +39,3 @@ class CRMDashboard extends Component {
     );
   }
 }
-
-const mapStateToProps = (state) => ({
-  userLogin : state.UserCurrent.userLogin,
-});
-
-const mapDispatchToProps = (dispatch) => ({});
-
-export default connect(mapStateToProps, mapDispatchToProps)(CRMDashboard);

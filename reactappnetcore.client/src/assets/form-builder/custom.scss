@@ -1,3 +1,4 @@
+@import '../layout/layout-variables';
 /* custom.css */
 .react-form-builder-toolbar {
   padding: 1rem;
@@ -235,3 +236,20 @@ input[type="checkbox" i] {
 .modal-content-custom {
   margin-top: 4.5rem;
 }
+
+// validator
+.fixed-sidebar {
+  --app-sidebar-for-validate: #{$app-sidebar-width};
+  &.closed-sidebar {
+    --app-sidebar-for-validate: #{$app-sidebar-width-collapsed};
+  }
+}
+
+.validation-error {
+  top: 50px;
+  left: auto!important;
+  right: 0;
+  // width: calc(100% - #{$app-sidebar-for-validate});
+  width: calc(100% - var(--app-sidebar-for-validate));
+}
+

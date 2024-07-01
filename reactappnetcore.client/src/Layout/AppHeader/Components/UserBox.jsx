@@ -29,6 +29,8 @@ import 'react-toastify/dist/ReactToastify.css';
 import city3 from "../../../assets/utils/images/dropdown-header/city3.jpg";
 import avatar1 from "../../../assets/utils/images/avatars/1.jpg";
 import { connect } from "react-redux";
+import { loadUserApp, logoutUserApp } from "../../../reducers/UserCurrent";
+import { Redirect } from "react-router-dom";
 
 class UserBox extends React.Component {
   constructor(props) {
@@ -37,14 +39,20 @@ class UserBox extends React.Component {
       active: false,
       userLogin : props.userLogin
     };
+    this.mounted = false;
   }
 
   componentDidUpdate(prevProps, prevState) {
     if (this.props.userLogin !== prevProps.userLogin) {
       this.setState({
-        userLogin,
+        userLogin : this.props.userLogin,
       })
     }
+  }
+
+  componentDidMount() {
+    this.props.loadUserApp();
+    this.mounted = true;
   }
 
   notify2 = () =>
@@ -60,6 +68,9 @@ class UserBox extends React.Component {
     ));
 
   render() {
+    if(this.mounted && (this.props.userLogin == null || this.props.userLogin.username === '')) {
+      return <Redirect to="/pages/login"/>
+    }
     return (
       <Fragment>
         <div className="header-btn-lg pe-0">
@@ -96,7 +107,7 @@ class UserBox extends React.Component {
                                 </div>
                               </div>
                               <div className="widget-content-right me-2">
-                                <Button className="btn-pill btn-shadow btn-shine" color="focus">
+                                <Button onClick={() => this.props.logoutUserApp()} className="btn-pill btn-shadow btn-shine" color="focus">
                                   Logout
                                 </Button>
                               </div>
@@ -208,6 +219,9 @@ const mapStateToProps = (state) => ({
   userLogin : state.UserCurrent.userLogin,
 });
 
-const mapDispatchToProps = (dispatch) => ({});
+const mapDispatchToProps = (dispatch) => ({
+  loadUserApp : () => dispatch(loadUserApp()),
+  logoutUserApp : () => dispatch(logoutUserApp()),
+});
 
 export default connect(mapStateToProps, mapDispatchToProps)(UserBox);

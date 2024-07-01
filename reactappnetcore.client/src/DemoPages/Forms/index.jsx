@@ -38,8 +38,10 @@ import AppFooter from "../../Layout/AppFooter/";
 import ThemeOptions from "../../Layout/ThemeOptions/";
 import TemplateList from "./Components/TemplateList";
 import CreateOrUpdateTemplate from "./Components/CreateOrUpdateTemplate";
-import CreateAnswerForm from "./Components/CreateAnswer/CreateAnswerForm";
+import CreateAnswerForm from "./Components/CreateAnswer";
 import AnswerList from "./Components/AnswerList";
+import AnswerItemView from "./Components/AnswerItem/AnswerItemView";
+import AnswerItemEdit from "./Components/AnswerItem/AnswerItemEdit";
 
 const Forms = ({ match }) => (
   <Fragment>
@@ -57,6 +59,8 @@ const Forms = ({ match }) => (
           <Route exact path={`${match.url}/template-list`} component={TemplateList}/>
           <Route exact path={`${match.url}/create-answer-form/:Id`} component={CreateAnswerForm}/>
           <Route exact path={`${match.url}/answer-list`} component={AnswerList}/>
+          <Route exact path={`${match.url}/answer-item-view/:Id`} component={AnswerItemView}/>
+          <Route exact path={`${match.url}/answer-item-edit/:Id`} component={AnswerItemEdit}/>
 
           {/* Form Elements */}
 
